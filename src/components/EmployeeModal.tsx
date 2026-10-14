@@ -35,11 +35,13 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
 }) => {
   const [code, setCode] = useState('');
   const [personnelCode, setPersonnelCode] = useState('');
+  const [nationalId, setNationalId] = useState('');
   const [fullName, setFullName] = useState('');
   const [schoolId, setSchoolId] = useState('');
   const [grade, setGrade] = useState<EducationalGrade>('متوسطه اول');
   const [selectedRoleOption, setSelectedRoleOption] = useState<StandardStaffRole>('معاون پرورشی');
   const [customRoleTitle, setCustomRoleTitle] = useState('');
+  const [experienceYears, setExperienceYears] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -63,6 +65,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
     if (existingEmployee) {
       setCode(existingEmployee.code);
       setPersonnelCode(existingEmployee.personnelCode || existingEmployee.code || '');
+      setNationalId(existingEmployee.nationalId || '');
       setFullName(existingEmployee.fullName);
       setSchoolId(existingEmployee.schoolId);
       setGrade(existingEmployee.grade);
@@ -76,6 +79,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
         setCustomRoleTitle(existingEmployee.role || '');
       }
 
+      setExperienceYears(existingEmployee.experienceYears !== undefined ? String(existingEmployee.experienceYears) : '');
       setPhone(existingEmployee.phone);
       setNotes(existingEmployee.notes || '');
       setErrorMessage('');
@@ -86,11 +90,13 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
       const nextCode = getNextAvailableCode();
       setCode(nextCode);
       setPersonnelCode(nextCode);
+      setNationalId('');
       setFullName('');
       setSchoolId(schools[0]?.id || '');
       setGrade(schools[0]?.grade || 'متوسطه اول');
       setSelectedRoleOption('معاون پرورشی');
       setCustomRoleTitle('');
+      setExperienceYears('');
       setPhone('');
       setNotes('');
       setErrorMessage('');
@@ -160,12 +166,14 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
         {
           code: formattedCode,
           personnelCode: personnelCode.trim() || formattedCode,
+          nationalId: nationalId.trim() || undefined,
           fullName: fullName.trim(),
           schoolId: '',
           schoolName: newSchoolName.trim(),
           grade,
           role: finalRole,
           customRoleTitle: selectedRoleOption === 'سایر' ? customRoleTitle.trim() : undefined,
+          experienceYears: experienceYears.trim() ? (isNaN(Number(experienceYears.trim())) ? experienceYears.trim() : Number(experienceYears.trim())) : undefined,
           phone: phone.trim(),
           notes: notes.trim(),
         },
@@ -180,12 +188,14 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
         {
           code: formattedCode,
           personnelCode: personnelCode.trim() || formattedCode,
+          nationalId: nationalId.trim() || undefined,
           fullName: fullName.trim(),
           schoolId,
           schoolName,
           grade,
           role: finalRole,
           customRoleTitle: selectedRoleOption === 'سایر' ? customRoleTitle.trim() : undefined,
+          experienceYears: experienceYears.trim() ? (isNaN(Number(experienceYears.trim())) ? experienceYears.trim() : Number(experienceYears.trim())) : undefined,
           phone: phone.trim(),
           notes: notes.trim(),
         },
@@ -367,18 +377,43 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">کد پرسنلی</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">کد ملی (۱۰ رقمی)</label>
               <input
                 type="text"
-                value={personnelCode}
-                onChange={(e) => setPersonnelCode(e.target.value)}
-                placeholder="کد پرسنلی..."
+                maxLength={10}
+                value={nationalId}
+                onChange={(e) => setNationalId(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="مثال: 1289456123"
                 dir="ltr"
                 className="w-full text-center font-mono font-bold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-hidden text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">شماره تماس</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">کد پرسنلی / استخدامی</label>
+              <input
+                type="text"
+                value={personnelCode}
+                onChange={(e) => setPersonnelCode(e.target.value)}
+                placeholder="مثال: 201001"
+                dir="ltr"
+                className="w-full text-center font-mono font-bold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-hidden text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">سابقه خدمت (سال)</label>
+              <input
+                type="text"
+                value={experienceYears}
+                onChange={(e) => setExperienceYears(e.target.value)}
+                placeholder="مثال: 15 یا 15 سال"
+                className="w-full text-center font-mono font-bold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-hidden text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">شماره تماس همکار</label>
               <input
                 type="text"
                 value={phone}

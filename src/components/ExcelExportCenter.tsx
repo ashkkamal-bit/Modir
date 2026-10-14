@@ -22,12 +22,18 @@ interface ExcelExportCenterProps {
 export const ExcelExportCenter: React.FC<ExcelExportCenterProps> = ({ db }) => {
   const [downloadingApp, setDownloadingApp] = useState(false);
 
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
   const handleDownloadExcel = () => {
     exportFullExcelReport(db);
+    setStatusMessage('فایل اکسل جامع گزارش‌ها با موفقیت دانلود شد.');
+    setTimeout(() => setStatusMessage(null), 4000);
   };
 
   const handleDownloadHtml = () => {
     exportFullHtmlReport(db);
+    setStatusMessage('فایل خروجی HTML جامع با موفقیت دانلود شد.');
+    setTimeout(() => setStatusMessage(null), 4000);
   };
 
   const handleOpenHtmlPreview = () => {
@@ -38,9 +44,12 @@ export const ExcelExportCenter: React.FC<ExcelExportCenterProps> = ({ db }) => {
     try {
       setDownloadingApp(true);
       await exportCompleteStandaloneApp(db);
+      setStatusMessage('نسخه کامل و مستقل نرم‌افزار HTML با موفقیت دانلود شد.');
+      setTimeout(() => setStatusMessage(null), 4000);
     } catch (e) {
       console.error(e);
-      alert('خطا در صدور نسخه کامل نرم‌افزار.');
+      setStatusMessage('خطا در صدور نسخه کامل نرم‌افزار. لطفاً مجدداً تلاش فرمایید.');
+      setTimeout(() => setStatusMessage(null), 4000);
     } finally {
       setDownloadingApp(false);
     }
@@ -48,6 +57,13 @@ export const ExcelExportCenter: React.FC<ExcelExportCenterProps> = ({ db }) => {
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+      {statusMessage && (
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl text-xs font-bold flex items-center justify-between shadow-xs">
+          <span>{statusMessage}</span>
+          <button onClick={() => setStatusMessage(null)} className="text-emerald-700 hover:text-emerald-900 font-bold px-2">✕</button>
+        </div>
+      )}
+
       {/* Top Header Card */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>

@@ -92,12 +92,16 @@ export function loadDatabase(): AppDatabase {
         }
 
         const personnelCode = emp.personnelCode || `2010${emp.code}`;
+        const nationalId = emp.nationalId || (emp.nationalCode ? String(emp.nationalCode) : undefined);
+        const experienceYears = emp.experienceYears !== undefined ? emp.experienceYears : (emp.experience ? emp.experience : undefined);
 
         return {
           ...emp,
           role: updatedRole,
           customRoleTitle: customRole,
           personnelCode,
+          nationalId,
+          experienceYears,
         };
       });
     }

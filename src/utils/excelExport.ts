@@ -123,15 +123,18 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
   ];
   XLSX.utils.book_append_sheet(wb, ws1, 'ریز عملکرد و تکالیف');
 
-  // Sheet 2: خلاصه عملکرد همکاران
+  // Sheet 2: خلاصه عملکرد و مشخصات همکاران
   const sheet2Data: (string | number)[][] = [
     [
       'ردیف',
-      'کد همکار',
-      'نام همکار',
+      'کد کارتابل',
+      'نام و نام خانوادگی',
+      'کد ملی',
+      'کد پرسنلی',
       'آموزشگاه',
       'مقطع تحصیلی',
-      'سمت',
+      'سمت سازمانی',
+      'سابقه خدمت (سال)',
       'کل طرح‌ها',
       'طرح‌های همگانی',
       'مجموع ضرایب',
@@ -158,9 +161,12 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       r2++,
       emp.code,
       emp.fullName,
+      emp.nationalId || '---',
+      emp.personnelCode || '---',
       emp.schoolName,
       emp.grade,
       emp.role,
+      emp.experienceYears !== undefined ? `${emp.experienceYears} سال` : '---',
       empAssignments.length,
       stats.total,
       stats.totalCoefficients,
@@ -176,11 +182,11 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
 
   const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
   ws2['!cols'] = [
-    { wch: 6 }, { wch: 10 }, { wch: 22 }, { wch: 30 }, { wch: 20 }, { wch: 20 },
-    { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 16 },
+    { wch: 6 }, { wch: 10 }, { wch: 22 }, { wch: 16 }, { wch: 14 }, { wch: 30 }, { wch: 20 }, { wch: 20 },
+    { wch: 16 }, { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 16 },
     { wch: 14 }, { wch: 18 }, { wch: 18 }, { wch: 20 },
   ];
-  XLSX.utils.book_append_sheet(wb, ws2, 'خلاصه همکاران');
+  XLSX.utils.book_append_sheet(wb, ws2, 'خلاصه همکاران و سوابق');
 
   // Sheet 3: طرح‌ها
   const sheet3Data: (string | number)[][] = [

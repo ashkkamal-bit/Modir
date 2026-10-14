@@ -43,13 +43,15 @@ export type ExecutionStatus = 'done' | 'late' | 'not_done';
 export interface Employee {
   id: string;
   code: string; // 2 digits: "01", "02", ... "99" (کد اختصاصی / شناسه سریع)
-  personnelCode?: string; // کد پرسنلی یا شناسه یکتا
+  personnelCode?: string; // کد پرسنلی یا شناسه استخدامی
+  nationalId?: string; // کد ملی (۱۰ رقمی)
   fullName: string;
   schoolId: string;
   schoolName: string;
   grade: EducationalGrade;
   role: StaffRole;
   customRoleTitle?: string; // عنوان دقیق در صورت انتخاب گزینه «سایر»
+  experienceYears?: number | string; // سابقه خدمت به سال
   phone: string;
   notes?: string;
   createdAt: string;

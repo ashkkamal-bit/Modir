@@ -56,7 +56,8 @@ export const OfflineHtmlModal: React.FC<OfflineHtmlModalProps> = ({ isOpen, onCl
       setTimeout(() => setDownloadSuccess(null), 4000);
     } catch (err) {
       console.error(err);
-      alert('خطا در دریافت فایل HTML.');
+      setDownloadSuccess('خطا در دریافت فایل HTML. لطفاً مجدداً تلاش فرمایید.');
+      setTimeout(() => setDownloadSuccess(null), 4000);
     } finally {
       setDownloading(false);
     }
@@ -71,7 +72,8 @@ export const OfflineHtmlModal: React.FC<OfflineHtmlModalProps> = ({ isOpen, onCl
       setTimeout(() => setCopied(false), 3000);
     } catch (err) {
       console.error(err);
-      alert('خطا در کپی؛ لطفاً دکمه «دانلود خروجی HTML» را بزنید.');
+      setDownloadSuccess('امکان کپی خودکار فراهم نشد؛ لطفاً دکمه «دانلود خروجی HTML» را بزنید.');
+      setTimeout(() => setDownloadSuccess(null), 5000);
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Employee, School, EducationalGrade } from '../types';
+import * as XLSX from 'xlsx';
+import { Employee, School, EducationalGrade, AppDatabase } from '../types';
 import { toPersianDigits } from '../utils/jalali';
 import {
   Users,
@@ -20,7 +21,13 @@ import {
   ArrowUpDown,
   Briefcase,
   Hash,
+  Upload,
+  Clock,
+  IdCard,
+  FileSpreadsheet,
+  Download,
 } from 'lucide-react';
+import { EmployeeExcelImportModal } from './EmployeeExcelImportModal';
 
 interface EmployeesManagementProps {
   employees: Employee[];
@@ -29,6 +36,9 @@ interface EmployeesManagementProps {
   onOpenNewModal: () => void;
   onEditEmployee: (emp: Employee) => void;
   onDeleteEmployee: (empId: string) => void;
+  onNavigateToExcelImport?: () => void;
+  db?: AppDatabase;
+  onUpdateDatabase?: (newDb: AppDatabase) => void;
 }
 
 const GRADES_LIST: { id: string; label: string }[] = [
@@ -82,6 +92,9 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
   onOpenNewModal,
   onEditEmployee,
   onDeleteEmployee,
+  onNavigateToExcelImport,
+  db,
+  onUpdateDatabase,
 }) => {
   const [generalSearch, setGeneralSearch] = useState('');
   const [nameFilter, setNameFilter] = useState('');
@@ -89,6 +102,84 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
   const [schoolFilter, setSchoolFilter] = useState('all');
   const [gradeFilter, setGradeFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
+
+  const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
+
+  const handleDownloadTemplate = () => {
+    const wb = XLSX.utils.book_new();
+    const headers = [
+      'کد ملی',
+      'کد پرسنلی',
+      'نام و نام خانوادگی',
+      'نام آموزشگاه',
+      'مقطع تحصیلی',
+      'سمت سازمانی',
+      'سابقه خدمت (سال)',
+      'شماره تماس',
+      'توضیحات و سوابق',
+    ];
+    const sampleData = [
+      headers,
+      [
+        '1289456123',
+        '201001',
+        'حسین صادقی',
+        'دبیرستان شهید بهشتی',
+        'متوسطه اول',
+        'معاون پرورشی',
+        '15',
+        '09131112233',
+        'همکار با سابقه، مسئول برگزاری مسابقات',
+      ],
+      [
+        '1287349102',
+        '201002',
+        'زهره کریمی',
+        'دبیرستان فرزانگان',
+        'متوسطه دوم نظری',
+        'معاون پرورشی',
+        '12',
+        '09132223344',
+        'پیگیر و منظم در ارسال گزارش‌ها',
+      ],
+      [
+        '1290123456',
+        '201003',
+        'رضا مرادی',
+        'دبستان انقلاب اسلامی',
+        'ابتدایی دوره دوم',
+        'آموزگار',
+        '8',
+        '09133334455',
+        'آموزگار پایه پنجم',
+      ],
+      [
+        '1278912345',
+        '201004',
+        'الهام سعیدی',
+        'هنرستان فنی دخترانه کوثر',
+        'هنرستان فنی و حرفه‌ای و کاردانش',
+        'دبیر',
+        '10',
+        '09134445566',
+        'دبیر تربیت بدنی',
+      ],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(sampleData);
+    ws['!cols'] = [
+      { wch: 16 },
+      { wch: 14 },
+      { wch: 24 },
+      { wch: 30 },
+      { wch: 22 },
+      { wch: 20 },
+      { wch: 18 },
+      { wch: 16 },
+      { wch: 35 },
+    ];
+    XLSX.utils.book_append_sheet(wb, ws, 'مشخصات همکاران');
+    XLSX.writeFile(wb, 'الگوی_اکسل_مشخصات_همکاران_ناحیه۶.xlsx');
+  };
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
@@ -131,18 +222,22 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
       const empNormName = normalizeText(emp.fullName);
       const empNormCode = normalizeText(emp.code);
       const empNormPersonnel = normalizeText(emp.personnelCode || '');
+      const empNormNationalId = normalizeText(emp.nationalId || '');
       const empNormSchool = normalizeText(emp.schoolName);
       const empNormRole = normalizeText(emp.role);
       const empNormPhone = normalizeText(emp.phone);
+      const empNormExp = normalizeText(String(emp.experienceYears || ''));
 
       if (normGeneral) {
         const matchesGeneral =
           empNormName.includes(normGeneral) ||
           empNormCode.includes(normGeneral) ||
           empNormPersonnel.includes(normGeneral) ||
+          empNormNationalId.includes(normGeneral) ||
           empNormSchool.includes(normGeneral) ||
           empNormRole.includes(normGeneral) ||
-          empNormPhone.includes(normGeneral);
+          empNormPhone.includes(normGeneral) ||
+          empNormExp.includes(normGeneral);
 
         if (!matchesGeneral) return false;
       }
@@ -153,6 +248,7 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
         const matchesCode =
           empNormCode.includes(normCode) ||
           empNormPersonnel.includes(normCode) ||
+          empNormNationalId.includes(normCode) ||
           normalizeText(toPersianDigits(emp.code)).includes(normCode);
         if (!matchesCode) return false;
       }
@@ -203,26 +299,65 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-lg">
+              ناحیه ۶ اصفهان
+            </span>
+            <span className="text-xs text-slate-500 font-medium">پرونده پرسنلی همکاران</span>
+          </div>
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <Users className="w-6 h-6 text-emerald-600" />
             <span>مدیریت اطلاعات و پرونده همکاران</span>
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            سامانه جستجوی هوشمند، فیلتر ترکیبی بر اساس نام، کد پرسنلی یا نام آموزشگاه
+            سامانه جستجوی هوشمند بر اساس کد ملی، کد پرسنلی، نام آموزشگاه، مقطع، سمت و سابقه خدمت
           </p>
         </div>
 
-        <button
-          onClick={onOpenNewModal}
-          className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>ثبت همکار جدید با کد اختصاصی</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {db && onUpdateDatabase ? (
+            <button
+              onClick={() => setIsExcelModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+              title="بارگذاری فایل اکسل شامل کد ملی، پرسنلی، آموزشگاه، مقطع، سمت و سابقه"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
+              <span>بارگذاری مشخصات همکاران از Excel</span>
+            </button>
+          ) : onNavigateToExcelImport ? (
+            <button
+              onClick={onNavigateToExcelImport}
+              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+              title="بارگذاری فایل اکسل شامل کد ملی، پرسنلی، آموزشگاه، مقطع، سمت و سابقه"
+            >
+              <Upload className="w-4 h-4" />
+              <span>بارگذاری همکاران از Excel</span>
+            </button>
+          ) : null}
+
+          <button
+            onClick={handleDownloadTemplate}
+            className="flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+            title="دانلود الگوی استاندارد اکسل شامل کد ملی، کد پرسنلی، نام آموزشگاه، مقطع، سمت و سابقه"
+          >
+            <Download className="w-4 h-4 text-emerald-700" />
+            <span>الگوی اکسل همکاران</span>
+          </button>
+
+          <button
+            onClick={onOpenNewModal}
+            className="flex items-center gap-2 px-4 py-2.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>ثبت دستی همکار</span>
+          </button>
+        </div>
       </div>
 
+      {/* Toolbar & Filters */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="p-4 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
           <div className="relative flex-1 min-w-[280px]">
@@ -231,7 +366,7 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
               type="text"
               value={generalSearch}
               onChange={(e) => setGeneralSearch(e.target.value)}
-              placeholder="جستجوی همه‌جانبه (نام، کد پرسنلی، نام مدرسه، شماره تماس)..."
+              placeholder="جستجوی همه‌جانبه (نام، کد ملی، کد پرسنلی، نام مدرسه، سمت، سابقه)..."
               className="w-full pr-10 pl-9 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-hidden font-medium"
             />
             {generalSearch && (
@@ -259,14 +394,14 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
               <button
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg text-xs font-bold cursor-pointer ${viewMode === 'grid' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600'}`}
-                title="کارتی"
+                title="نمایش کارتی"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('table')}
                 className={`p-1.5 rounded-lg text-xs font-bold cursor-pointer ${viewMode === 'table' ? 'bg-white text-emerald-700 shadow-xs' : 'text-slate-600'}`}
-                title="جدولی"
+                title="نمایش جدولی فشرده"
               >
                 <List className="w-4 h-4" />
               </button>
@@ -299,12 +434,12 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">کد ۲ رقمی / پرسنلی:</label>
+                <label className="block font-bold text-slate-700 mb-1">کد ملی / پرسنلی / کارتابل:</label>
                 <input
                   type="text"
                   value={codeFilter}
                   onChange={(e) => setCodeFilter(e.target.value)}
-                  placeholder="01..."
+                  placeholder="کد ملی، پرسنلی یا ۲ رقمی..."
                   dir="ltr"
                   className="w-full text-center font-mono font-bold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white outline-hidden"
                 />
@@ -352,6 +487,15 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
             </div>
           </div>
         )}
+
+        <div className="px-4 py-2.5 bg-slate-50/60 flex items-center justify-between text-xs text-slate-500">
+          <span>
+            تعداد همکاران: <strong className="font-mono text-emerald-700 font-bold">{toPersianDigits(sortedEmployees.length)}</strong> نفر
+          </span>
+          <span className="text-[11px] text-slate-400">
+            برای ثبت مشخصات گروهی از اکسل، از کلید «بارگذاری همکاران از Excel» استفاده فرمایید.
+          </span>
+        </div>
       </div>
 
       {sortedEmployees.length === 0 ? (
@@ -370,9 +514,16 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-mono font-black text-sm bg-slate-900 text-white px-3 py-1 rounded-xl">
-                    کد {emp.code}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-mono font-black text-sm bg-slate-900 text-white px-3 py-1 rounded-xl">
+                      کد {emp.code}
+                    </span>
+                    {emp.nationalId && (
+                      <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-lg" title="کد ملی">
+                        ملی: {emp.nationalId}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => onEditEmployee(emp)}
@@ -392,9 +543,16 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
                 </div>
 
                 <h3 className="text-base font-bold text-slate-800">{emp.fullName}</h3>
-                <p className="text-xs text-emerald-800 font-semibold mt-0.5">{emp.role}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-emerald-800 font-semibold">{emp.role}</span>
+                  {emp.experienceYears !== undefined && emp.experienceYears !== '' && (
+                    <span className="text-[11px] bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.2 rounded-md font-bold">
+                      سابقه: {toPersianDigits(emp.experienceYears)} سال
+                    </span>
+                  )}
+                </div>
 
-                <div className="mt-3 pt-3 border-t border-slate-100 space-y-1 text-xs text-slate-600">
+                <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
                   <div className="flex items-center gap-1.5">
                     <Building className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span>{emp.schoolName}</span>
@@ -403,8 +561,14 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
                     <GraduationCap className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="text-slate-500">{emp.grade}</span>
                   </div>
+                  {emp.personnelCode && (
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <span className="text-slate-400">پرسنلی:</span>
+                      <span className="font-mono text-slate-700 font-bold">{emp.personnelCode}</span>
+                    </div>
+                  )}
                   {emp.phone && (
-                    <div className="flex items-center gap-1.5 font-mono text-slate-500">
+                    <div className="flex items-center gap-1.5 font-mono text-slate-500 text-[11px]">
                       <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                       <span dir="ltr">{emp.phone}</span>
                     </div>
@@ -431,12 +595,15 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
             <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
               <tr>
                 <th className="p-3 text-center w-12">#</th>
-                <th onClick={() => toggleSort('code')} className="p-3 w-24 text-center cursor-pointer">کد</th>
+                <th onClick={() => toggleSort('code')} className="p-3 w-20 text-center cursor-pointer">کد کارتابل</th>
                 <th onClick={() => toggleSort('name')} className="p-3 cursor-pointer">نام و نام خانوادگی</th>
-                <th className="p-3">سمت</th>
+                <th className="p-3 text-center">کد ملی</th>
+                <th className="p-3 text-center">کد پرسنلی</th>
                 <th onClick={() => toggleSort('school')} className="p-3 cursor-pointer">آموزشگاه</th>
                 <th className="p-3">مقطع</th>
-                <th className="p-3 text-center w-32">عملیات</th>
+                <th className="p-3">سمت</th>
+                <th className="p-3 text-center">سابقه خدمت</th>
+                <th className="p-3 text-center w-28">عملیات</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
@@ -445,9 +612,14 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
                   <td className="p-3 text-center font-bold text-slate-400">{toPersianDigits(idx + 1)}</td>
                   <td className="p-3 text-center font-mono font-bold">{emp.code}</td>
                   <td className="p-3 font-bold text-slate-800">{emp.fullName}</td>
-                  <td className="p-3 text-emerald-800 font-semibold">{emp.role}</td>
+                  <td className="p-3 text-center font-mono text-slate-700">{emp.nationalId || '---'}</td>
+                  <td className="p-3 text-center font-mono text-slate-700">{emp.personnelCode || '---'}</td>
                   <td className="p-3 text-slate-700">{emp.schoolName}</td>
                   <td className="p-3 text-slate-500">{emp.grade}</td>
+                  <td className="p-3 text-emerald-800 font-semibold">{emp.role}</td>
+                  <td className="p-3 text-center font-bold text-amber-800 font-mono">
+                    {emp.experienceYears !== undefined && emp.experienceYears !== '' ? `${toPersianDigits(emp.experienceYears)} سال` : '---'}
+                  </td>
                   <td className="p-3 text-center">
                     <button
                       onClick={() => onSelectEmployee(emp)}
@@ -461,6 +633,15 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
             </tbody>
           </table>
         </div>
+      )}
+
+      {db && onUpdateDatabase && (
+        <EmployeeExcelImportModal
+          isOpen={isExcelModalOpen}
+          onClose={() => setIsExcelModalOpen(false)}
+          db={db}
+          onUpdateDatabase={onUpdateDatabase}
+        />
       )}
     </div>
   );

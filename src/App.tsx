@@ -479,6 +479,8 @@ export default function App() {
           <EmployeesManagement
             employees={db.employees}
             schools={db.schools}
+            db={db}
+            onUpdateDatabase={updateDatabase}
             onSelectEmployee={handleSelectEmployee}
             onOpenNewModal={() => {
               setEditingEmployee(null);
@@ -489,6 +491,7 @@ export default function App() {
               setIsEmployeeModalOpen(true);
             }}
             onDeleteEmployee={handleDeleteEmployee}
+            onNavigateToExcelImport={() => setCurrentTab('excel_import')}
           />
         )}
 

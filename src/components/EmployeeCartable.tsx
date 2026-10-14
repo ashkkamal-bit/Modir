@@ -264,10 +264,22 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
                       : employee.role}
                   </span>
                 </div>
+                {employee.nationalId && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-teal-400 font-bold text-[11px]">کد ملی:</span>
+                    <span className="font-mono text-white">{employee.nationalId}</span>
+                  </div>
+                )}
                 {employee.personnelCode && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-teal-400 font-bold text-[11px]">پرسنلی:</span>
                     <span className="font-mono text-white">{employee.personnelCode}</span>
+                  </div>
+                )}
+                {employee.experienceYears !== undefined && employee.experienceYears !== '' && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-teal-400 font-bold text-[11px]">سابقه خدمت:</span>
+                    <span className="text-amber-300 font-bold">{toPersianDigits(employee.experienceYears)} سال</span>
                   </div>
                 )}
                 {employee.phone && (
