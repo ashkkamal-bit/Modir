@@ -6,6 +6,7 @@ import {
   School,
   EmployeeProgram,
   SystemSettings,
+  SYSTEM_DESIGNER_NAME,
 } from './types';
 import {
   loadDatabase,
@@ -82,9 +83,18 @@ export default function App() {
   );
 
   const handleQuickJump = useCallback(
-    (code: string): boolean => {
-      const padded = padZero(code);
-      const found = db.employees.find((e) => e.code === padded);
+    (query: string): boolean => {
+      const clean = query.trim();
+      if (!clean) return false;
+      const padded = padZero(clean);
+      const found = db.employees.find(
+        (e) =>
+          e.code === padded ||
+          e.code === clean ||
+          (e.nationalId && e.nationalId.replace(/[^0-9]/g, '') === clean.replace(/[^0-9]/g, '')) ||
+          (e.personnelCode && e.personnelCode.replace(/[^0-9]/g, '') === clean.replace(/[^0-9]/g, '')) ||
+          e.fullName.toLowerCase().includes(clean.toLowerCase())
+      );
       if (found) {
         setSelectedEmployee(found);
         setCurrentTab('cartable');
@@ -625,7 +635,7 @@ export default function App() {
             </span>
           </div>
           <span className="text-slate-400">
-            سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان | طراح و برنامه‌نویس: <strong className="text-slate-700">{db.settings.developerName || 'علیرضا شریعتی کمال آبادی'}</strong>
+            سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان | طراح و برنامه‌نویس: <strong className="text-slate-700">{SYSTEM_DESIGNER_NAME}</strong>
           </span>
         </div>
       </footer>

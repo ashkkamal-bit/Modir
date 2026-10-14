@@ -112,13 +112,15 @@ export interface EmployeeProgram {
   updatedAt: string;
 }
 
+export const SYSTEM_DESIGNER_NAME = 'علیرضا شریعتی کمال آبادی کارشناس قرآن،عترت و نماز';
+
 export interface SystemSettings {
   officeTitle: string; // نام اداره آموزش و پرورش (مثلاً: اداره آموزش و پرورش ناحیه ۶ اصفهان)
   departmentTitle: string; // عنوان کارشناسی
   officerName: string; // نام کارشناس مسئول
   academicYear: string; // سال تحصیلی مثلاً ۱۴۰۳-۱۴۰۴
   lastBackupDate?: string;
-  developerName?: string; // برنامه‌نویس سیستم
+  developerName?: string; // طراح و برنامه‌نویس سیستم (دائمی و غیرقابل تغییر)
   selectedFont?: AppFont; // فونت قالب برنامه: وزیری | میترا | تیتر | نستعلیق
 }
 

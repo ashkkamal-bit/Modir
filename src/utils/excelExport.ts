@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { AppDatabase, PROGRAM_SECTIONS } from '../types';
+import { AppDatabase, PROGRAM_SECTIONS, SYSTEM_DESIGNER_NAME } from '../types';
 import { calculateEmployeeStats, calculateProgramStats, calculateSchoolStats } from './storage';
 import { getCurrentJalaliDate, getCurrentJalaliYear, updateJalaliDateToCurrentYear, toPersianDigits } from './jalali';
 
@@ -16,9 +16,9 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
   wb.Props = {
     Title: `گزارش جامع عملکرد ۵ حوزه تخصصی با ضرایب - ${db.settings.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'}`,
     Subject: 'گزارش ارزیابی و رتبه‌بندی عملکرد نیروها و مدارس با اعمال ۵ حوزه و ضرایب ۱ تا ۳ طرح‌ها',
-    Author: db.settings.developerName || 'علیرضا شریعتی کمال آبادی',
+    Author: SYSTEM_DESIGNER_NAME,
     Company: db.settings.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان',
-    Comments: `برنامه‌نویس: ${db.settings.developerName || 'علیرضا شریعتی کمال آبادی'} - تاریخ صدور: ${currentJalaliDate}`,
+    Comments: `طراح و برنامه‌نویس: ${SYSTEM_DESIGNER_NAME} - تاریخ صدور: ${currentJalaliDate}`,
   };
 
   const empMap = new Map(db.employees.map((e) => [e.id, e]));
@@ -31,7 +31,7 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
     ['عنوان کارشناسی / واحد سازمانی', db.settings.departmentTitle || 'کارشناسی امور پرورشی و فرهنگی'],
     ['سال تحصیلی رسمی', dynamicAcademicYear],
     ['تاریخ صدور این فایل گزارش (شمسی)', currentJalaliDate],
-    ['طراح و برنامه‌نویس سامانه', db.settings.developerName || 'علیرضا شریعتی کمال آبادی'],
+    ['طراح و برنامه‌نویس سامانه', SYSTEM_DESIGNER_NAME],
     ['تعداد کل همکاران ثبت‌شده', db.employees.length],
     ['تعداد کل آموزشگاه‌ها و مدارس', db.schools.length],
     ['تعداد کل طرح‌ها و برنامه‌ها', db.programs.length],

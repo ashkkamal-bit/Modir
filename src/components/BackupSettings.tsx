@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { AppDatabase, SystemSettings } from '../types';
+import { AppDatabase, SystemSettings, SYSTEM_DESIGNER_NAME } from '../types';
 import { exportDatabaseAsJson, importDatabaseFromJson, resetDatabaseToDefault } from '../utils/storage';
 import { exportFullHtmlReport } from '../utils/htmlExport';
 import { exportCompleteStandaloneApp, openCompleteStandaloneAppInNewTab } from '../utils/standaloneAppExport';
@@ -15,6 +15,7 @@ import {
   CheckCircle,
   FileCode,
   ExternalLink,
+  Lock,
 } from 'lucide-react';
 import { OfflineHtmlModal } from './OfflineHtmlModal';
 
@@ -39,7 +40,12 @@ export const BackupSettings: React.FC<BackupSettingsProps> = ({
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateSettings(settings);
+    const updated = {
+      ...settings,
+      developerName: SYSTEM_DESIGNER_NAME,
+    };
+    setSettings(updated);
+    onUpdateSettings(updated);
     setSuccessMessage('تنظیمات سربرگ اداری با موفقیت ذخیره شد.');
     setTimeout(() => setSuccessMessage(''), 4000);
   };
@@ -290,13 +296,23 @@ export const BackupSettings: React.FC<BackupSettingsProps> = ({
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-700 mb-1">طراح و برنامه‌نویس:</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-bold text-slate-700">طراح و برنامه‌نویس سامانه:</label>
+                <span className="flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-bold">
+                  <Lock className="w-3 h-3 text-amber-600" />
+                  غیرقابل تغییر
+                </span>
+              </div>
               <input
                 type="text"
-                value={settings.developerName || 'علیرضا شریعتی کمال آبادی'}
-                onChange={(e) => setSettings({ ...settings, developerName: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white outline-hidden font-bold text-emerald-800"
+                readOnly
+                disabled
+                value={SYSTEM_DESIGNER_NAME}
+                className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-xl font-bold text-emerald-800 cursor-not-allowed select-none opacity-95"
               />
+              <p className="text-[10px] text-slate-400 mt-1">
+                نام طراح و برنامه‌نویس سامانه دائمی و طبق ضوابط سامانه قفل شده است.
+              </p>
             </div>
           </div>
 

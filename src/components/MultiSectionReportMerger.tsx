@@ -4,6 +4,7 @@ import {
   AppDatabase,
   ProgramSection,
   PROGRAM_SECTIONS,
+  SYSTEM_DESIGNER_NAME,
 } from '../types';
 import { toPersianDigits, getCurrentJalaliDate, padZero } from '../utils/jalali';
 import {
@@ -366,7 +367,7 @@ export const MultiSectionReportMerger: React.FC<MultiSectionReportMergerProps> =
               قابلیت جدید: میکس چندبخشی
             </span>
             <span className="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-lg">
-              طراح: <strong className="text-slate-800">{db.settings.developerName || 'علیرضا شریعتی کمال آبادی'}</strong>
+              طراح: <strong className="text-slate-800">{SYSTEM_DESIGNER_NAME}</strong>
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">

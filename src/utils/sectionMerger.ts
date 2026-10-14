@@ -4,6 +4,7 @@ import {
   PROGRAM_SECTIONS,
   ExecutionStatus,
   SystemSettings,
+  SYSTEM_DESIGNER_NAME,
 } from '../types';
 import { normalizePersianText } from './storage';
 import { toPersianDigits, getCurrentJalaliDate, padZero } from './jalali';
@@ -662,9 +663,9 @@ export function exportMergedMultiSectionExcel(
   wb.Props = {
     Title: `گزارش تجمیعی و میکس بخش‌های پنج‌گانه - ${settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'}`,
     Subject: 'گزارش ادغام شده از فایل‌های اکسل بخش‌های پرورشی، ابتدایی، متوسطه و تربیت بدنی',
-    Author: settings?.developerName || 'علیرضا شریعتی کمال آبادی',
+    Author: SYSTEM_DESIGNER_NAME,
     Company: settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان',
-    Comments: `طراح: ${settings?.developerName || 'علیرضا شریعتی کمال آبادی'} - تاریخ: ${result.generatedAt}`,
+    Comments: `طراح و برنامه‌نویس: ${SYSTEM_DESIGNER_NAME} - تاریخ: ${result.generatedAt}`,
   };
 
   // Sheet 1: شناسنامه و خلاصه
@@ -672,7 +673,7 @@ export function exportMergedMultiSectionExcel(
     ['مشخصه', 'مقدار در گزارش تجمیعی'],
     ['عنوان گزارش', 'گزارش تجمیعی و میکس‌شده بخش‌های پنج‌گانه'],
     ['اداره متبوع', settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'],
-    ['طراح و برنامه‌نویس', settings?.developerName || 'علیرضا شریعتی کمال آبادی'],
+    ['طراح و برنامه‌نویس', SYSTEM_DESIGNER_NAME],
     ['سال تحصیلی', settings?.academicYear || 'سال تحصیلی جاری'],
     ['تاریخ صدور گزارش', result.generatedAt],
     ['تعداد بخش‌های میکس‌شده', `${result.sectionsCount} از ۵ بخش (${result.sectionsList.join('، ')})`],
@@ -838,7 +839,7 @@ export function exportMergedMultiSectionHtml(
   filename = 'گزارش_جامع_میکس_بخش_های_پنجگانه',
 ) {
   const officeTitle = settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان';
-  const developerName = settings?.developerName || 'علیرضا شریعتی کمال آبادی';
+  const developerName = SYSTEM_DESIGNER_NAME;
   const academicYear = settings?.academicYear || 'سال تحصیلی جاری';
 
   const html = `<!DOCTYPE html>

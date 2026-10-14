@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Employee, Program, School, EmployeeProgram, SystemSettings, PROGRAM_SECTIONS } from '../types';
+import { Employee, Program, School, EmployeeProgram, SystemSettings, PROGRAM_SECTIONS, SYSTEM_DESIGNER_NAME } from '../types';
 import { calculateOverallStats, calculateEmployeeStats } from '../utils/storage';
 import { toPersianDigits, padZero } from '../utils/jalali';
 import { PieChart } from './PieChart';
@@ -66,15 +66,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const handleQuickSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
-    const clean = padZero(quickCode.trim());
-    if (!clean || clean === '00') {
-      setErrorMessage('لطفاً یک کد دو رقمی معتبر (از 01 تا 99) وارد کنید.');
+    const raw = quickCode.trim();
+    if (!raw) {
+      setErrorMessage('لطفاً کد اختصاصی دو رقمی، کد ملی یا کد پرسنلی همکار را وارد فرمایید.');
       return;
     }
 
-    const success = onQuickJump(clean);
+    const success = onQuickJump(raw);
     if (!success) {
-      setErrorMessage(`همکاری با کد «${clean}» در سیستم پیدا نشد. لطفاً کد را بررسی کنید.`);
+      setErrorMessage(`همکاری با مشخصات «${raw}» در سامانه یافت نشد. لطفاً کد دو رقمی، کد ملی یا کد پرسنلی را بررسی فرمایید.`);
     }
   };
 

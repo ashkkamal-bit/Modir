@@ -1,4 +1,4 @@
-import { AppDatabase, EmployeeStats, EmployeeProgram, Employee, Program, SchoolStats, ScopeDetailedStats } from '../types';
+import { AppDatabase, EmployeeStats, EmployeeProgram, Employee, Program, SchoolStats, ScopeDetailedStats, SYSTEM_DESIGNER_NAME } from '../types';
 import { getInitialDatabase } from './sampleData';
 import { getCurrentJalaliYear, updateJalaliDateToCurrentYear, toPersianDigits } from './jalali';
 
@@ -116,9 +116,7 @@ export function loadDatabase(): AppDatabase {
       ) {
         parsed.settings.officeTitle = 'اداره آموزش و پرورش ناحیه ۶ اصفهان';
       }
-      if (!parsed.settings.developerName || parsed.settings.developerName === 'علیرضا شریعتی') {
-        parsed.settings.developerName = 'علیرضا شریعتی کمال آبادی';
-      }
+      parsed.settings.developerName = SYSTEM_DESIGNER_NAME;
       if (
         !parsed.settings.academicYear ||
         parsed.settings.academicYear.includes('1403') ||
@@ -138,6 +136,9 @@ export function loadDatabase(): AppDatabase {
 
 export function saveDatabase(db: AppDatabase): void {
   try {
+    if (db && db.settings) {
+      db.settings.developerName = SYSTEM_DESIGNER_NAME;
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
   } catch (err) {
     console.error('Error saving database to localStorage:', err);
@@ -238,7 +239,7 @@ export function importDatabaseFromJson(jsonString: string): AppDatabase {
       ...defaultDb.settings,
       ...(parsed.settings || {}),
       officeTitle: 'اداره آموزش و پرورش ناحیه ۶ اصفهان',
-      developerName: 'علیرضا شریعتی کمال آبادی',
+      developerName: SYSTEM_DESIGNER_NAME,
     },
     version: parsed.version || 1,
   };

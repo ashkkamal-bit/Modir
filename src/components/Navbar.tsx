@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SystemSettings, Employee, AppDatabase } from '../types';
+import { SystemSettings, Employee, AppDatabase, SYSTEM_DESIGNER_NAME } from '../types';
 import { padZero } from '../utils/jalali';
 import { exportFullHtmlReport } from '../utils/htmlExport';
 import {
@@ -116,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-500 font-medium">
-                  طراح: <strong className="text-slate-800">{settings.developerName || 'علیرضا شریعتی کمال آبادی'}</strong>
+                  طراح: <strong className="text-slate-800">{SYSTEM_DESIGNER_NAME}</strong>
                 </span>
               </div>
             </div>
