@@ -109,7 +109,7 @@ export const OfflineHtmlModal: React.FC<OfflineHtmlModalProps> = ({ isOpen, onCl
                 {db?.settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'}
               </span>
               <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-                طراح: <strong className="text-emerald-700">{db?.settings?.developerName || 'علیرضا شریعتی'}</strong>
+                طراح: <strong className="text-emerald-700">{db?.settings?.developerName || 'علیرضا شریعتی کمال آبادی'}</strong>
               </span>
             </div>
             <h3 className="text-lg font-black text-slate-900 leading-tight">

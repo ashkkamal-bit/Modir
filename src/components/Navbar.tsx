@@ -18,6 +18,7 @@ import {
   FileCode,
   Trophy,
   Upload,
+  Layers,
 } from 'lucide-react';
 import { OfflineHtmlModal } from './OfflineHtmlModal';
 import { IsfahanEmblem, IsfahanTileBorder } from './IsfahanMotifs';
@@ -80,6 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'programs', label: 'طرح‌ها (۵ حوزه)', icon: BookOpen },
     { id: 'assign', label: 'تخصیص برنامه', icon: Share2, action: onOpenAssignModal },
     { id: 'excel_import', label: 'ورود گروهی از Excel', icon: Upload },
+    { id: 'section_merger', label: 'میکس و تجمیع گزارش‌ها', icon: Layers },
     { id: 'ranking', label: 'رتبه‌بندی همکاران', icon: Trophy },
     { id: 'performance_report', label: 'گزارش همکاران', icon: PieChart },
     { id: 'schools_report', label: 'گزارش مدارس', icon: Building2 },
@@ -114,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
                 <span className="text-slate-300">•</span>
                 <span className="text-slate-500 font-medium">
-                  طراح: <strong className="text-slate-800">{settings.developerName || 'علیرضا شریعتی'}</strong>
+                  طراح: <strong className="text-slate-800">{settings.developerName || 'علیرضا شریعتی کمال آبادی'}</strong>
                 </span>
               </div>
             </div>

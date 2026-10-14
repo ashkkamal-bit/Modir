@@ -17,9 +17,10 @@ import {
 
 interface ExcelExportCenterProps {
   db: AppDatabase;
+  onNavigate?: (tab: string) => void;
 }
 
-export const ExcelExportCenter: React.FC<ExcelExportCenterProps> = ({ db }) => {
+export const ExcelExportCenter: React.FC<ExcelExportCenterProps> = ({ db, onNavigate }) => {
   const [downloadingApp, setDownloadingApp] = useState(false);
 
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -72,7 +73,7 @@ export const ExcelExportCenter: React.FC<ExcelExportCenterProps> = ({ db }) => {
               🏛️ {db.settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'}
             </span>
             <span className="text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
-              طراح: <strong className="text-emerald-700">{db.settings?.developerName || 'علیرضا شریعتی'}</strong>
+              طراح: <strong className="text-emerald-700">{db.settings?.developerName || 'علیرضا شریعتی کمال آبادی'}</strong>
             </span>
           </div>
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -147,6 +148,33 @@ export const ExcelExportCenter: React.FC<ExcelExportCenterProps> = ({ db }) => {
             <span>{downloadingApp ? 'در حال صدور...' : 'دانلود نسخه کامل نرم‌افزار (HTML)'}</span>
           </button>
         </div>
+      </div>
+
+      {/* Multi-Section Merger Card */}
+      <div className="bg-white p-5 rounded-3xl border border-teal-200 shadow-xs flex flex-wrap items-center justify-between gap-4 bg-teal-50/30">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
+            <Layers className="w-5 h-5 text-teal-700" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[10px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full">جدید</span>
+              <h4 className="font-bold text-sm text-slate-800">میکس و ادغام گزارش‌های اکسل بخش‌های مختلف</h4>
+            </div>
+            <p className="text-xs text-slate-500">
+              بارگذاری گزارش‌های اکسل ارسالی از پرورشی، ابتدایی، متوسطه و تربیت بدنی و استخراج کارنامه نهایی و گزارش تجمیعی مشترک
+            </p>
+          </div>
+        </div>
+        {onNavigate && (
+          <button
+            onClick={() => onNavigate('section_merger')}
+            className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <span>ورود به بخش میکس گزارش‌ها</span>
+            <span>↵</span>
+          </button>
+        )}
       </div>
 
       {/* Excel Sheets Breakdown */}

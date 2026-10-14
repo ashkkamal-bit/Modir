@@ -116,8 +116,8 @@ export function loadDatabase(): AppDatabase {
       ) {
         parsed.settings.officeTitle = 'اداره آموزش و پرورش ناحیه ۶ اصفهان';
       }
-      if (!parsed.settings.developerName) {
-        parsed.settings.developerName = 'علیرضا شریعتی';
+      if (!parsed.settings.developerName || parsed.settings.developerName === 'علیرضا شریعتی') {
+        parsed.settings.developerName = 'علیرضا شریعتی کمال آبادی';
       }
       if (
         !parsed.settings.academicYear ||
@@ -238,7 +238,7 @@ export function importDatabaseFromJson(jsonString: string): AppDatabase {
       ...defaultDb.settings,
       ...(parsed.settings || {}),
       officeTitle: 'اداره آموزش و پرورش ناحیه ۶ اصفهان',
-      developerName: 'علیرضا شریعتی',
+      developerName: 'علیرضا شریعتی کمال آبادی',
     },
     version: parsed.version || 1,
   };

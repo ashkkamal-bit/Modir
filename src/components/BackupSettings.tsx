@@ -293,7 +293,7 @@ export const BackupSettings: React.FC<BackupSettingsProps> = ({
               <label className="block font-bold text-slate-700 mb-1">طراح و برنامه‌نویس:</label>
               <input
                 type="text"
-                value={settings.developerName || 'علیرضا شریعتی'}
+                value={settings.developerName || 'علیرضا شریعتی کمال آبادی'}
                 onChange={(e) => setSettings({ ...settings, developerName: e.target.value })}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white outline-hidden font-bold text-emerald-800"
               />

@@ -356,7 +356,7 @@ export function generateHtmlReportContent(db: AppDatabase): string {
         <span style="font-size: 20px;">📄</span>
         <div>
           <h2>خروجی رسمی پرونده ارزشیابی عملکرد (۵ حوزه تخصصی با ضرایب ۱ تا ۳)</h2>
-          <p style="font-size: 11px; opacity: 0.8;">${settings.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'} | طراح و برنامه‌نویس: ${settings.developerName || 'علیرضا شریعتی'}</p>
+          <p style="font-size: 11px; opacity: 0.8;">${settings.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'} | طراح و برنامه‌نویس: ${settings.developerName || 'علیرضا شریعتی کمال آبادی'}</p>
         </div>
       </div>
       <button class="btn" onclick="window.print()">
@@ -381,7 +381,7 @@ export function generateHtmlReportContent(db: AppDatabase): string {
         <div style="text-align: left; font-size: 12px; color: #334155; line-height: 1.8;">
           <div><strong>سال تحصیلی:</strong> ${settings.academicYear}</div>
           <div><strong>تاریخ صدور گزارش:</strong> ${toPersianDigits(todayJalali)}</div>
-          <div><strong>برنامه‌نویس:</strong> ${settings.developerName || 'علیرضا شریعتی'}</div>
+          <div><strong>برنامه‌نویس:</strong> ${settings.developerName || 'علیرضا شریعتی کمال آبادی'}</div>
           <div><strong>سیستم ارزیابی:</strong> ضرایب ۱ تا ۳ برای طرح‌های مهم</div>
         </div>
       </div>
@@ -695,7 +695,7 @@ export function generateHtmlReportContent(db: AppDatabase): string {
     <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #64748b; border-top: 1px solid var(--slate-200); padding-top: 16px;">
       <div>این گزارش رسمی توسط سامانه هوشمند ارزشیابی عملکرد ${settings.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'} صادر شده است.</div>
       <div style="margin-top: 6px; font-weight: 700; color: #1e293b;">
-        طراح و برنامه‌نویس سامانه: ${settings.developerName || 'علیرضا شریعتی'}
+        طراح و برنامه‌نویس سامانه: ${settings.developerName || 'علیرضا شریعتی کمال آبادی'}
       </div>
     </div>
   </div>

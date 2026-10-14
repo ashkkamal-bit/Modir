@@ -238,6 +238,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           ))}
         </div>
+
+        {/* Multi-Section Merger Banner */}
+        <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white flex flex-wrap items-center justify-between gap-4 shadow-md border border-emerald-700/40">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
+              <Layers className="w-5 h-5 text-emerald-300" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[10px] bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded-full font-bold">قابلیت جدید</span>
+                <span className="text-xs font-bold text-white">میکس و تجمیع گزارش‌های اکسل بخش‌های مختلف</span>
+              </div>
+              <p className="text-xs text-slate-300">
+                بارگذاری گزارش‌های اکسل پرورشی، آموزش ابتدایی، متوسطه اول، متوسطه دوم و تربیت بدنی و استخراج گزارش نهایی تجمیعی
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigate('section_merger')}
+            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <span>ورود به بخش میکس گزارش‌ها</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}

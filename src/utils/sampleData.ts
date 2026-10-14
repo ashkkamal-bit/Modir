@@ -539,7 +539,7 @@ export const INITIAL_SETTINGS = {
   officerName: 'کارشناس مسئول ارزیابی عملکرد',
   academicYear: `سال تحصیلی ${toPersianDigits(getCurrentJalaliYear())}-${toPersianDigits(Number(getCurrentJalaliYear()) + 1)}`,
   lastBackupDate: '',
-  developerName: 'علیرضا شریعتی',
+  developerName: 'علیرضا شریعتی کمال آبادی',
 };
 
 export function getInitialDatabase(): AppDatabase {

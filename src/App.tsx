@@ -27,6 +27,7 @@ import { SchoolPerformanceReport } from './components/SchoolPerformanceReport';
 import { ProgramPerformanceReport } from './components/ProgramPerformanceReport';
 import { ExcelExportCenter } from './components/ExcelExportCenter';
 import { ExcelBulkImport } from './components/ExcelBulkImport';
+import { MultiSectionReportMerger } from './components/MultiSectionReportMerger';
 import { BackupSettings } from './components/BackupSettings';
 import { UserGuide } from './components/UserGuide';
 import { IsfahanTileBorder } from './components/IsfahanMotifs';
@@ -586,8 +587,19 @@ export default function App() {
           />
         )}
 
+        {/* Tab 8.8: Multi-Section Reports Merger & Consolidated Final Report */}
+        {currentTab === 'section_merger' && (
+          <MultiSectionReportMerger
+            db={db}
+            onUpdateDatabase={updateDatabase}
+            onNavigate={setCurrentTab}
+          />
+        )}
+
         {/* Tab 9: Excel and HTML Export Center */}
-        {currentTab === 'excel_export' && <ExcelExportCenter db={db} />}
+        {currentTab === 'excel_export' && (
+          <ExcelExportCenter db={db} onNavigate={setCurrentTab} />
+        )}
 
         {/* Tab 10: Backup & Settings */}
         {currentTab === 'backup_settings' && (
@@ -613,7 +625,7 @@ export default function App() {
             </span>
           </div>
           <span className="text-slate-400">
-            سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان | طراح و برنامه‌نویس: <strong className="text-slate-700">{db.settings.developerName || 'علیرضا شریعتی'}</strong>
+            سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان | طراح و برنامه‌نویس: <strong className="text-slate-700">{db.settings.developerName || 'علیرضا شریعتی کمال آبادی'}</strong>
           </span>
         </div>
       </footer>
