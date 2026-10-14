@@ -1,0 +1,6 @@
+{
+  "name": "سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان",
+  "description": "سامانه جامع، حرفه‌ای و عملیاتی ثبت، ارزشیابی، تحلیل و گزارش‌گیری عملکرد نیروها و مدارس آموزش و پرورش ناحیه ۶ اصفهان",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

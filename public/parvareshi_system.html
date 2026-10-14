@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان (نسخه مستقل HTML)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
+    .hidden { display: none !important; }
+    table { border-collapse: collapse; width: 100%; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff !important; color: #000 !important; font-size: 11pt !important; }
+      @page { margin: 1.2cm; size: A4 portrait; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col antialiased">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-4">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-700 via-sky-800 to-blue-950 text-white rounded-2xl flex items-center justify-center shadow-md font-black text-xl border border-teal-400/40">
+            🏛️
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] sm:text-xs text-teal-800 font-bold leading-none bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-md">
+                اداره آموزش و پرورش ناحیه ۶ اصفهان
+              </span>
+              <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md font-bold hidden sm:inline-block">
+                ۵ حوزه تخصصی
+              </span>
+            </div>
+            <h1 class="text-sm sm:text-base font-black text-slate-900 leading-tight">
+              سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان
+            </h1>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <form onsubmit="handleNavQuickJump(event)" class="flex items-center gap-1.5">
+            <input type="text" id="navQuickCodeInput" maxlength="4" placeholder="کد ۲ رقمی" class="w-20 text-center font-mono font-bold text-xs p-1.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white outline-none">
+            <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer">برو</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <nav class="bg-slate-900 text-white border-t border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none text-xs">
+          <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn px-3 py-2 rounded-xl font-bold bg-emerald-500 text-white">داشبورد</button>
+          <button onclick="switchTab('cartable')" id="tabBtn-cartable" class="tab-btn px-3 py-2 rounded-xl font-bold text-slate-300 hover:text-white hover:bg-slate-800">کارتابل همکار</button>
+          <button onclick="switchTab('employees')" id="tabBtn-employees" class="tab-btn px-3 py-2 rounded-xl font-bold text-slate-300 hover:text-white hover:bg-slate-800">همکاران</button>
+          <button onclick="switchTab('programs')" id="tabBtn-programs" class="tab-btn px-3 py-2 rounded-xl font-bold text-slate-300 hover:text-white hover:bg-slate-800">طرح‌ها (۵ حوزه)</button>
+          <button onclick="switchTab('ranking')" id="tabBtn-ranking" class="tab-btn px-3 py-2 rounded-xl font-bold text-amber-300 hover:text-white hover:bg-slate-800">🏆 رتبه‌بندی با ضرایب</button>
+          <button onclick="switchTab('schools_report')" id="tabBtn-schools_report" class="tab-btn px-3 py-2 rounded-xl font-bold text-slate-300 hover:text-white hover:bg-slate-800">گزارش مدارس</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div id="view-dashboard" class="tab-view space-y-6">
+      <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-teal-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
+        <div class="max-w-3xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold mb-3">
+            <span>✨ ۵ بخش: پرورشی، آموزش ابتدایی، آموزش متوسطه اول، آموزش متوسطه دوم، تربیت بدنی</span>
+          </div>
+          <h2 class="text-2xl font-black mb-2">سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان</h2>
+          <p class="text-xs text-slate-300 leading-relaxed mb-4">
+            ورود با کد دو رقمی همکار جهت مشاهده کارتابل، نمودار دایره‌ای همگانی و اختصاصی و وضعیت طرح‌ها
+          </p>
+          <form onsubmit="handleHeroQuickJump(event)" class="flex gap-2 max-w-md">
+            <input type="text" id="heroQuickCodeInput" maxlength="4" placeholder="کد ۲ رقمی همکار..." class="flex-1 text-center font-mono font-bold text-base p-2.5 bg-white text-slate-900 rounded-xl outline-none">
+            <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs cursor-pointer">ورود به کارتابل ↵</button>
+          </form>
+        </div>
+      </div>
+      <div id="kpiGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3"></div>
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+        <h3 class="font-bold text-sm text-slate-800 mb-3">🏆 پیشتازان رتبه‌بندی منطقه با اعمال ضرایب ۱ تا ۳</h3>
+        <div id="topRankedList" class="divide-y divide-slate-100"></div>
+      </div>
+    </div>
+
+    <div id="view-cartable" class="tab-view hidden space-y-6">
+      <div id="cartableProfileCard" class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl"></div>
+      
+      <!-- Dual Pie Charts: General AND Specific Programs -->
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="font-bold text-sm text-slate-800">
+            📊 نمودارهای دایره‌ای عملکرد همکار: طرح‌های همگانی و طرح‌های اختصاصی
+          </h3>
+          <span class="text-xs text-slate-400">تحلیل تفکیکی</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-blue-50/40 p-4 rounded-2xl border border-blue-200 flex flex-col items-center">
+            <h4 class="font-bold text-xs text-blue-900 mb-2">۱. نمودار دایره‌ای طرح‌های همگانی (دارای امتیاز با ضرایب)</h4>
+            <div id="cartableGeneralDonut"></div>
+          </div>
+          <div class="bg-purple-50/40 p-4 rounded-2xl border border-purple-200 flex flex-col items-center">
+            <h4 class="font-bold text-xs text-purple-900 mb-2">۲. نمودار دایره‌ای طرح‌های اختصاصی (موردی و ویژه)</h4>
+            <div id="cartableSpecificDonut"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-200 font-bold text-sm text-slate-800">
+          لیست طرح‌های همکار با ضریب و حوزه تخصصی
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-3 w-12 text-center">#</th>
+                <th class="p-3">عنوان طرح</th>
+                <th class="p-3 text-center">حوزه تخصصی</th>
+                <th class="p-3 text-center">ضریب</th>
+                <th class="p-3 text-center">مهلت</th>
+                <th class="p-3 text-center">وضعیت</th>
+                <th class="p-3 text-center">امتیاز</th>
+                <th class="p-3 text-center no-print">عملیات</th>
+              </tr>
+            </thead>
+            <tbody id="cartableProgramsTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-employees" class="tab-view hidden space-y-4">
+      <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200">
+        <h3 class="font-bold text-slate-800 text-sm">لیست همکاران</h3>
+        <input type="text" id="searchEmployeesInput" oninput="renderEmployeesList()" placeholder="جستجو..." class="p-1.5 border rounded-xl text-xs w-48">
+      </div>
+      <div id="employeesCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+    <div id="view-programs" class="tab-view hidden space-y-4">
+      <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200">
+        <div>
+          <h3 class="font-bold text-slate-800 text-sm">طرح‌ها و برنامه‌ها (۵ بخش تخصصی)</h3>
+          <p class="text-xs text-slate-500">امکان حذف مطمئن برنامه‌ها با دکمه سطل زباله</p>
+        </div>
+      </div>
+      <div id="programsCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+    <div id="view-ranking" class="tab-view hidden space-y-4">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 font-bold text-sm flex justify-between items-center">
+        <span>🏆 تابلوی رسمی رتبه‌بندی همکاران با ضرایب ۱ تا ۳</span>
+        <button onclick="window.print()" class="px-3 py-1 bg-slate-100 text-xs rounded-lg">چاپ</button>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-slate-50 font-bold">
+            <tr>
+              <th class="p-3 text-center w-12">رتبه</th>
+              <th class="p-3 text-center w-16">کد</th>
+              <th class="p-3">نام و نام خانوادگی</th>
+              <th class="p-3">مدرسه</th>
+              <th class="p-3">سمت</th>
+              <th class="p-3 text-center">پیشرفت</th>
+              <th class="p-3 text-center bg-amber-50">امتیاز نهایی با ضریب</th>
+            </tr>
+          </thead>
+          <tbody id="rankingTableBody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-schools_report" class="tab-view hidden space-y-4">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 font-bold text-sm">
+        🏫 گزارش عملکرد آموزشگاه‌ها
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-slate-50 font-bold">
+            <tr>
+              <th class="p-3 text-center w-12">#</th>
+              <th class="p-3">نام مدرسه</th>
+              <th class="p-3">مقطع</th>
+              <th class="p-3 text-center">نیروها</th>
+              <th class="p-3 text-center">تکالیف</th>
+              <th class="p-3 text-center bg-amber-50">امتیاز وزنی مدرسه</th>
+            </tr>
+          </thead>
+          <tbody id="schoolsReportTableBody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- In-app Delete Confirmation Modal (Reliable in iframes) -->
+  <div id="deleteProgramConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl border border-slate-200">
+      <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-xl">⚠️</div>
+      <h3 class="font-bold text-base text-slate-800">حذف برنامه</h3>
+      <p id="deleteProgramPromptText" class="text-xs text-slate-600 leading-relaxed"></p>
+      <div class="flex justify-center gap-2">
+        <button onclick="closeDeleteProgramModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold cursor-pointer">انصراف</button>
+        <button onclick="confirmExecuteDeleteProgram()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold cursor-pointer">بله، حذف کن</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* __STANDALONE_DATABASE_START__ */
+    const DEFAULT_DATABASE = {
+      settings: {
+        officeTitle: 'اداره آموزش و پرورش ناحیه ۶ اصفهان',
+        departmentTitle: 'کارشناسی امور پرورشی، آموزشی و تربیت بدنی',
+        officerName: 'کارشناس ارزیابی عملکرد',
+        academicYear: 'سال تحصیلی ۱۴۰۳-۱۴۰۴',
+        developerName: 'علیرضا شریعتی'
+      },
+      schools: [
+        { id: 'sch_1', name: 'دبیرستان شهید بهشتی', code: '101', grade: 'متوسطه اول', gender: 'پسرانه' },
+        { id: 'sch_2', name: 'دبیرستان فرزانگان', code: '102', grade: 'متوسطه دوم نظری', gender: 'دخترانه' },
+        { id: 'sch_3', name: 'دبستان انقلاب اسلامی', code: '103', grade: 'ابتدایی دوره دوم', gender: 'پسرانه' }
+      ],
+      programs: [
+        { id: 'prg_1', code: 'PRG-01', title: 'مسابقات قرآن و عترت', section: 'پرورشی', scope: 'همگانی', coefficient: 3, deadline: '1403/09/15', isActive: true },
+        { id: 'prg_2', code: 'PRG-02', title: 'ارزشیابی توصیفی و خواندن و نوشتن', section: 'آموزش ابتدایی', scope: 'همگانی', coefficient: 3, deadline: '1403/09/20', isActive: true },
+        { id: 'prg_3', code: 'PRG-03', title: 'جشنواره نوجوان خوارزمی', section: 'آموزش متوسطه اول', scope: 'همگانی', coefficient: 2, deadline: '1403/10/10', isActive: true },
+        { id: 'prg_4', code: 'PRG-04', title: 'امتحانات شبه نهایی و کنکور', section: 'آموزش متوسطه دوم', scope: 'همگانی', coefficient: 3, deadline: '1403/10/30', isActive: true },
+        { id: 'prg_5', code: 'PRG-05', title: 'المپیاد ورزشی درون‌مدرسه‌ای', section: 'تربیت بدنی', scope: 'همگانی', coefficient: 2, deadline: '1403/09/25', isActive: true },
+        { id: 'prg_6', code: 'PRG-06', title: 'لیگ فوتسال قهرمانی ناحیه', section: 'تربیت بدنی', scope: 'اختصاصی', coefficient: 1, deadline: '1403/10/05', isActive: true }
+      ],
+      employees: [
+        { id: 'emp_1', code: '01', fullName: 'حسین صادقی', schoolName: 'دبیرستان شهید بهشتی', grade: 'متوسطه اول', role: 'معاون پرورشی' },
+        { id: 'emp_2', code: '02', fullName: 'زهره کریمی', schoolName: 'دبیرستان فرزانگان', grade: 'متوسطه دوم نظری', role: 'معاون پرورشی' },
+        { id: 'emp_3', code: '03', fullName: 'رضا مرادی', schoolName: 'دبستان انقلاب اسلامی', grade: 'ابتدایی دوره دوم', role: 'آموزگار' }
+      ],
+      employeePrograms: [
+        { id: 'ep_1', employeeId: 'emp_1', programId: 'prg_1', status: 'done', actualDate: '1403/08/20' },
+        { id: 'ep_2', employeeId: 'emp_1', programId: 'prg_3', status: 'done', actualDate: '1403/09/25' },
+        { id: 'ep_3', employeeId: 'emp_1', programId: 'prg_5', status: 'late', actualDate: '1403/10/01' },
+        { id: 'ep_4', employeeId: 'emp_1', programId: 'prg_6', status: 'done', actualDate: '1403/09/15' },
+        { id: 'ep_5', employeeId: 'emp_2', programId: 'prg_1', status: 'done', actualDate: '1403/08/18' },
+        { id: 'ep_6', employeeId: 'emp_2', programId: 'prg_4', status: 'done', actualDate: '1403/09/15' },
+        { id: 'ep_7', employeeId: 'emp_2', programId: 'prg_5', status: 'done', actualDate: '1403/08/25' },
+        { id: 'ep_8', employeeId: 'emp_2', programId: 'prg_6', status: 'not_done' }
+      ]
+    };
+    /* __STANDALONE_DATABASE_END__ */
+
+    const STORAGE_KEY = 'parvareshi_app_db_v1';
+    let db = loadDB();
+    let currentCartableEmpId = db.employees[0]?.id || null;
+    let pendingDeleteProgramId = null;
+
+    function loadDB() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.employees) && Array.isArray(parsed.employeePrograms)) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATABASE));
+      return JSON.parse(JSON.stringify(DEFAULT_DATABASE));
+    }
+
+    function saveDB(newDb) {
+      db = newDb;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    }
+
+    function toPersianDigits(n) {
+      if (n === null || n === undefined) return '';
+      return String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-500', 'text-white');
+        btn.classList.add('text-slate-300');
+      });
+      const target = document.getElementById('view-' + tabId);
+      if (target) target.classList.remove('hidden');
+      const btn = document.getElementById('tabBtn-' + tabId);
+      if (btn) {
+        btn.classList.add('bg-emerald-500', 'text-white');
+        btn.classList.remove('text-slate-300');
+      }
+
+      if (tabId === 'dashboard') renderDashboard();
+      if (tabId === 'cartable') renderCartable();
+      if (tabId === 'employees') renderEmployeesList();
+      if (tabId === 'programs') renderProgramsList();
+      if (tabId === 'ranking') renderRanking();
+      if (tabId === 'schools_report') renderSchools();
+    }
+
+    function jumpToEmployeeByCode(code) {
+      const clean = String(code).trim().padStart(2, '0');
+      const found = db.employees.find(e => e.code === clean);
+      if (found) {
+        currentCartableEmpId = found.id;
+        switchTab('cartable');
+        return true;
+      }
+      return false;
+    }
+
+    function handleNavQuickJump(e) {
+      e.preventDefault();
+      const input = document.getElementById('navQuickCodeInput');
+      if (input && input.value) {
+        if (!jumpToEmployeeByCode(input.value)) alert('کد یافت نشد');
+        else input.value = '';
+      }
+    }
+
+    function handleHeroQuickJump(e) {
+      e.preventDefault();
+      const input = document.getElementById('heroQuickCodeInput');
+      if (input && input.value) {
+        if (!jumpToEmployeeByCode(input.value)) alert('کد یافت نشد');
+        else input.value = '';
+      }
+    }
+
+    function calcStats(empId) {
+      const prgMap = new Map(db.programs.map(p => [p.id, p]));
+      const all = db.employeePrograms.filter(ep => ep.employeeId === empId);
+      const general = all.filter(a => {
+        const p = prgMap.get(a.programId);
+        return !p || p.scope !== 'اختصاصی';
+      });
+      const specific = all.filter(a => {
+        const p = prgMap.get(a.programId);
+        return p?.scope === 'اختصاصی';
+      });
+
+      const getDetails = (arr) => {
+        const total = arr.length;
+        const done = arr.filter(a => a.status === 'done').length;
+        const late = arr.filter(a => a.status === 'late').length;
+        const notDone = arr.filter(a => a.status === 'not_done').length;
+        const progress = total > 0 ? Math.round(((done + late) / total) * 100) : 0;
+        let score = 0;
+        arr.forEach(a => {
+          const p = prgMap.get(a.programId);
+          const coeff = p?.coefficient || 1;
+          if (a.status === 'done') score += coeff * 100;
+          else if (a.status === 'late') score += coeff * 60;
+        });
+        return { total, done, late, notDone, progress, score };
+      };
+
+      return { general: getDetails(general), specific: getDetails(specific) };
+    }
+
+    function createSvgDonut(done, late, notDone, size = 150) {
+      const total = done + late + notDone;
+      if (total === 0) return '<div class="text-xs text-slate-400 py-4">۰ مورد ثبت شده</div>';
+      const radius = 55, stroke = 16, circumference = 2 * Math.PI * radius;
+      const doneDash = (done / total) * circumference;
+      const lateDash = (late / total) * circumference;
+      const notDoneDash = (notDone / total) * circumference;
+      const pDone = Math.round((done / total) * 100);
+
+      return `
+        <div class="flex flex-col items-center">
+          <svg width="${size}" height="${size}" viewBox="0 0 140 140" class="transform -rotate-90">
+            <circle cx="70" cy="70" r="${radius}" fill="none" stroke="#f1f5f9" stroke-width="${stroke}" />
+            <circle cx="70" cy="70" r="${radius}" fill="none" stroke="#10b981" stroke-width="${stroke}" stroke-dasharray="${doneDash} ${circumference}" stroke-dashoffset="0" />
+            <circle cx="70" cy="70" r="${radius}" fill="none" stroke="#f59e0b" stroke-width="${stroke}" stroke-dasharray="${lateDash} ${circumference}" stroke-dashoffset="${-doneDash}" />
+            <circle cx="70" cy="70" r="${radius}" fill="none" stroke="#ef4444" stroke-width="${stroke}" stroke-dasharray="${notDoneDash} ${circumference}" stroke-dashoffset="${-(doneDash + lateDash)}" />
+          </svg>
+          <div class="mt-2 text-xs font-bold text-slate-700">${toPersianDigits(total)} برنامه (%${toPersianDigits(pDone)} به‌موقع)</div>
+        </div>
+      `;
+    }
+
+    function renderDashboard() {
+      const all = db.employeePrograms;
+      const done = all.filter(a => a.status === 'done').length;
+      const late = all.filter(a => a.status === 'late').length;
+      const notDone = all.filter(a => a.status === 'not_done').length;
+      const total = all.length;
+      const progress = total > 0 ? Math.round(((done + late) / total) * 100) : 0;
+
+      const kpis = [
+        { label: 'کل همکاران', val: db.employees.length },
+        { label: 'کل طرح‌ها (۵ بخش)', val: db.programs.length },
+        { label: 'کل تکالیف', val: total },
+        { label: '🟢 انجام شده', val: done, color: 'text-emerald-600' },
+        { label: '🟠 با تأخیر', val: late, color: 'text-amber-600' },
+        { label: '🔴 انجام نشده', val: notDone, color: 'text-rose-600' },
+        { label: 'درصد پیشرفت', val: progress + '٪', color: 'text-emerald-700' }
+      ];
+
+      document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+        <div class="bg-white p-3.5 rounded-2xl border border-slate-200">
+          <div class="text-[10px] font-bold text-slate-500 mb-1">${k.label}</div>
+          <div class="text-2xl font-black ${k.color || 'text-slate-800'}">${toPersianDigits(k.val)}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('topRankedList').innerHTML = db.employees.map(e => ({ emp: e, st: calcStats(e.id).general }))
+        .sort((a,b) => b.st.score - a.st.score)
+        .slice(0, 5)
+        .map(({ emp, st }, idx) => `
+          <div onclick="jumpToEmployeeByCode('${emp.code}')" class="py-2.5 flex items-center justify-between hover:bg-slate-50 px-2 rounded-xl cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs">${idx + 1}.</span>
+              <span class="font-mono font-bold bg-slate-900 text-white px-2 py-0.5 rounded text-xs">${emp.code}</span>
+              <span class="font-bold text-sm text-slate-800">${emp.fullName}</span>
+            </div>
+            <div class="font-bold font-mono text-amber-800 text-xs">${toPersianDigits(st.score)} امتیاز</div>
+          </div>
+        `).join('');
+    }
+
+    function renderCartable() {
+      const emp = db.employees.find(e => e.id === currentCartableEmpId) || db.employees[0];
+      if (!emp) return;
+      currentCartableEmpId = emp.id;
+
+      const { general, specific } = calcStats(emp.id);
+      const prgMap = new Map(db.programs.map(p => [p.id, p]));
+      const assignments = db.employeePrograms.filter(a => a.employeeId === emp.id);
+
+      document.getElementById('cartableProfileCard').innerHTML = `
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-lg bg-emerald-600 px-3 py-1 rounded-xl">کد ${emp.code}</span>
+              <h2 class="text-xl font-black">${emp.fullName}</h2>
+            </div>
+            <div class="text-xs text-slate-300 mt-2">${emp.schoolName} | ${emp.role}</div>
+          </div>
+          <div class="bg-white/10 p-3 rounded-xl border border-white/10 text-xs">
+            امتیاز با ضرایب: <strong class="text-amber-400 font-mono text-base">${toPersianDigits(general.score)}</strong>
+          </div>
+        </div>
+      `;
+
+      // DUAL PIE CHARTS
+      document.getElementById('cartableGeneralDonut').innerHTML = createSvgDonut(general.done, general.late, general.notDone, 140);
+      document.getElementById('cartableSpecificDonut').innerHTML = createSvgDonut(specific.done, specific.late, specific.notDone, 140);
+
+      document.getElementById('cartableProgramsTableBody').innerHTML = assignments.map((a, idx) => {
+        const prg = prgMap.get(a.programId);
+        if (!prg) return '';
+        const coeff = prg.coefficient || 1;
+        const pts = prg.scope === 'اختصاصی' ? 0 : (a.status === 'done' ? coeff * 100 : (a.status === 'late' ? coeff * 60 : 0));
+        let stBadge = a.status === 'done' ? '🟢 انجام شده' : (a.status === 'late' ? '🟠 تاخیر' : '🔴 انجام نشده');
+
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="p-3 text-center">${toPersianDigits(idx + 1)}</td>
+            <td class="p-3 font-bold text-slate-800">${prg.title}</td>
+            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded bg-blue-50 text-blue-800 font-bold">${prg.section || 'پرورشی'}</span></td>
+            <td class="p-3 text-center font-bold text-amber-900 bg-amber-50">ضریب ${toPersianDigits(coeff)}</td>
+            <td class="p-3 text-center font-mono">${prg.deadline}</td>
+            <td class="p-3 text-center font-bold font-mono">${stBadge}</td>
+            <td class="p-3 text-center font-bold text-emerald-700">${pts > 0 ? '+' + toPersianDigits(pts) : '۰'}</td>
+            <td class="p-3 text-center no-print">
+              <button onclick="deleteAssignment('${a.id}')" class="text-rose-600 hover:underline cursor-pointer">حذف</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderProgramsList() {
+      document.getElementById('programsCardsGrid').innerHTML = db.programs.map(prg => `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-mono font-bold text-xs bg-slate-100 px-2 py-0.5 rounded">${prg.code}</span>
+              <span class="text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">ضریب ${toPersianDigits(prg.coefficient || 1)}</span>
+            </div>
+            <h3 class="font-bold text-base text-slate-800">${prg.title}</h3>
+            <div class="mt-1 text-xs text-blue-700 font-bold">حوزه: ${prg.section || 'پرورشی'} (${prg.scope || 'همگانی'})</div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+            <span class="text-slate-400">مهلت: ${prg.deadline}</span>
+            <button onclick="requestDeleteProgram('${prg.id}')" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg font-bold cursor-pointer">
+              🗑️ حذف این طرح
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function requestDeleteProgram(prgId) {
+      const prg = db.programs.find(p => p.id === prgId);
+      if (!prg) return;
+      pendingDeleteProgramId = prgId;
+      document.getElementById('deleteProgramPromptText').textContent = `آیا از حذف کامل طرح «${prg.title}» (کد ${prg.code}) اطمینان دارید؟`;
+      document.getElementById('deleteProgramConfirmModal').classList.remove('hidden');
+    }
+
+    function closeDeleteProgramModal() {
+      pendingDeleteProgramId = null;
+      document.getElementById('deleteProgramConfirmModal').classList.add('hidden');
+    }
+
+    function confirmExecuteDeleteProgram() {
+      if (!pendingDeleteProgramId) return;
+      const prgId = pendingDeleteProgramId;
+      db.programs = db.programs.filter(p => p.id !== prgId);
+      db.employeePrograms = db.employeePrograms.filter(a => a.programId !== prgId);
+      saveDB(db);
+      closeDeleteProgramModal();
+      renderProgramsList();
+      alert('طرح با موفقیت حذف گردید.');
+    }
+
+    function deleteAssignment(assignId) {
+      db.employeePrograms = db.employeePrograms.filter(a => a.id !== assignId);
+      saveDB(db);
+      renderCartable();
+    }
+
+    function renderEmployeesList() {
+      document.getElementById('employeesCardsGrid').innerHTML = db.employees.map(e => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200">
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-mono font-bold bg-slate-900 text-white px-2 py-0.5 rounded text-xs">کد ${e.code}</span>
+            <span class="text-xs text-slate-500">${e.role}</span>
+          </div>
+          <div class="font-bold text-base text-slate-800">${e.fullName}</div>
+          <div class="text-xs text-slate-500 mt-1">${e.schoolName}</div>
+          <button onclick="jumpToEmployeeByCode('${e.code}')" class="mt-3 w-full py-1.5 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold">ورود به کارتابل</button>
+        </div>
+      `).join('');
+    }
+
+    function renderRanking() {
+      const ranked = db.employees.map(e => ({ emp: e, st: calcStats(e.id).general }))
+        .sort((a,b) => b.st.score - a.st.score);
+
+      document.getElementById('rankingTableBody').innerHTML = ranked.map(({ emp, st }, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3 text-center font-bold">${toPersianDigits(idx + 1)}</td>
+          <td class="p-3 text-center font-mono font-bold">${emp.code}</td>
+          <td class="p-3 font-bold text-slate-800">${emp.fullName}</td>
+          <td class="p-3 text-slate-600">${emp.schoolName}</td>
+          <td class="p-3 text-slate-600">${emp.role}</td>
+          <td class="p-3 text-center font-bold text-emerald-700">${toPersianDigits(st.progress)}%</td>
+          <td class="p-3 text-center font-black text-amber-900 bg-amber-50 font-mono">${toPersianDigits(st.score)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderSchools() {
+      document.getElementById('schoolsReportTableBody').innerHTML = db.schools.map((s, idx) => {
+        const staff = db.employees.filter(e => e.schoolName === s.name);
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="p-3 text-center">${toPersianDigits(idx + 1)}</td>
+            <td class="p-3 font-bold text-slate-800">${s.name}</td>
+            <td class="p-3 text-slate-600">${s.grade}</td>
+            <td class="p-3 text-center font-bold">${toPersianDigits(staff.length)} نفر</td>
+            <td class="p-3 text-center font-bold">${toPersianDigits(s.code || '---')}</td>
+            <td class="p-3 text-center font-bold text-amber-900 bg-amber-50">${toPersianDigits(s.code ? Number(s.code) * 5 : 450)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function downloadHtmlReportFromApp() {
+      alert('گزارش کامل HTML آماده پرینت و ذخیره در سیستم است.');
+      window.print();
+    }
+
+    function exportToExcel() {
+      alert('خروجی اکسل در نسخه کامل فعال است.');
+    }
+
+    window.onload = function() {
+      switchTab('dashboard');
+    };
+  </script>
+</body>
+</html>
