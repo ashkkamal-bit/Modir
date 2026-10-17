@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { Employee, Program, School, EmployeeProgram, SystemSettings, PROGRAM_SECTIONS, SYSTEM_DESIGNER_NAME } from '../types';
+import {
+  Employee,
+  Program,
+  School,
+  EmployeeProgram,
+  SystemSettings,
+  PROGRAM_SECTIONS,
+  SYSTEM_DESIGNER_NAME,
+  SYSTEM_DESIGNER_WEBSITE,
+  SYSTEM_DESIGNER_PHONE,
+  SYSTEM_DESIGNER_PHONE_FA,
+  SYSTEM_DEVELOPER_PROFILE,
+} from '../types';
 import { calculateOverallStats, calculateEmployeeStats } from '../utils/storage';
 import { toPersianDigits, padZero } from '../utils/jalali';
 import { PieChart } from './PieChart';
@@ -20,6 +32,9 @@ import {
   Briefcase,
   FileCode,
   Layers,
+  ShieldCheck,
+  Phone,
+  Globe,
 } from 'lucide-react';
 import {
   IsfahanSkyline,
@@ -124,6 +139,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-bold">
               <span>⭐ ضرایب ۱ تا ۳ برای طرح‌های مهم</span>
             </span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 text-blue-200 border border-blue-500/30 text-xs font-bold">
+              <span>طراح: <strong>{SYSTEM_DESIGNER_NAME}</strong></span>
+              <span className="text-blue-400">•</span>
+              <a
+                href={SYSTEM_DEVELOPER_PROFILE.websiteUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:text-white transition-colors"
+              >
+                {SYSTEM_DESIGNER_WEBSITE}
+              </a>
+              <span className="text-blue-400">•</span>
+              <a
+                href={`tel:${SYSTEM_DESIGNER_PHONE}`}
+                className="underline hover:text-white font-mono transition-colors"
+              >
+                {SYSTEM_DESIGNER_PHONE_FA}
+              </a>
+            </div>
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight mb-3">
@@ -260,6 +294,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
             className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 shrink-0"
           >
             <span>ورود به بخش میکس گزارش‌ها</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Dedicated Backup & Restore Feature Banner */}
+        <div className="mt-3 p-4 rounded-2xl bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white flex flex-wrap items-center justify-between gap-4 shadow-md border border-blue-600/40">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-400/30 shrink-0">
+              <ShieldCheck className="w-5 h-5 text-blue-300" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[10px] bg-blue-500/30 text-blue-200 px-2 py-0.5 rounded-full font-bold">بخش پشتیبان‌گیری</span>
+                <span className="text-xs font-bold text-white">پشتیبان‌گیری کامل و بازیابی پایگاه داده (JSON)</span>
+              </div>
+              <p className="text-xs text-slate-300">
+                دریافت سریع فایل پشتیبان، بازیابی فایل با پیش‌نمایش هوشمند، و تاریخچه خودکار نسخه‌های ذخیره‌شده
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigate('backup_settings')}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <span>ورود به پشتیبان‌گیری و بازیابی</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -432,10 +491,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* Quick Actions Footer */}
-          <div className="mt-6 pt-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div className="mt-6 pt-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-6 gap-2">
             <button
               onClick={onOpenNewEmployeeModal}
-              className="flex items-center justify-center gap-1.5 p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
+              className="flex items-center justify-center gap-1.5 p-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
             >
               <UserPlus className="w-4 h-4 text-emerald-600" />
               <span>ثبت همکار</span>
@@ -443,7 +502,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <button
               onClick={onOpenNewProgramModal}
-              className="flex items-center justify-center gap-1.5 p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
+              className="flex items-center justify-center gap-1.5 p-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
             >
               <BookOpen className="w-4 h-4 text-blue-600" />
               <span>تعریف طرح</span>
@@ -451,16 +510,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <button
               onClick={onOpenAssignModal}
-              className="flex items-center justify-center gap-1.5 p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
+              className="flex items-center justify-center gap-1.5 p-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold cursor-pointer"
             >
               <Share2 className="w-4 h-4 text-teal-600" />
               <span>تخصیص</span>
             </button>
 
+            <button
+              onClick={() => onNavigate('backup_settings')}
+              className="flex items-center justify-center gap-1.5 p-2 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-xl text-xs font-bold cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4 text-blue-600" />
+              <span>پشتیبان‌گیری</span>
+            </button>
+
             {onExportHtml && (
               <button
                 onClick={onExportHtml}
-                className="flex items-center justify-center gap-1.5 p-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold cursor-pointer shadow-xs"
+                className="flex items-center justify-center gap-1.5 p-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold cursor-pointer shadow-xs"
               >
                 <FileCode className="w-4 h-4 text-emerald-400" />
                 <span>خروجی HTML</span>
@@ -469,7 +536,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             <button
               onClick={onExportExcel}
-              className="flex items-center justify-center gap-1.5 p-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold cursor-pointer shadow-xs"
+              className="flex items-center justify-center gap-1.5 p-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold cursor-pointer shadow-xs"
             >
               <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
               <span>خروجی اکسل</span>

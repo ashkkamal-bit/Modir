@@ -5,6 +5,8 @@ import {
   ProgramSection,
   PROGRAM_SECTIONS,
   SYSTEM_DESIGNER_NAME,
+  SYSTEM_DESIGNER_WEBSITE,
+  SYSTEM_DESIGNER_PHONE,
 } from '../types';
 import { toPersianDigits, getCurrentJalaliDate, padZero } from '../utils/jalali';
 import {
@@ -366,8 +368,14 @@ export const MultiSectionReportMerger: React.FC<MultiSectionReportMergerProps> =
             <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
               قابلیت جدید: میکس چندبخشی
             </span>
-            <span className="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-lg">
-              طراح: <strong className="text-slate-800">{SYSTEM_DESIGNER_NAME}</strong>
+            <span className="text-xs text-slate-700 font-bold bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
+              طراح: <strong className="text-slate-900">{SYSTEM_DESIGNER_NAME}</strong>
+            </span>
+            <span className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
+              {SYSTEM_DESIGNER_WEBSITE}
+            </span>
+            <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+              {SYSTEM_DESIGNER_PHONE}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">

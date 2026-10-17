@@ -112,7 +112,21 @@ export interface EmployeeProgram {
   updatedAt: string;
 }
 
-export const SYSTEM_DESIGNER_NAME = 'علیرضا شریعتی کمال آبادی کارشناس قرآن،عترت و نماز';
+export const SYSTEM_DESIGNER_NAME = 'علیرضا شریعتی کمال آبادی';
+export const SYSTEM_DESIGNER_FULL_TITLE = 'علیرضا شریعتی کمال آبادی کارشناس قرآن، عترت و نماز';
+export const SYSTEM_DESIGNER_WEBSITE = 'arshadevelop.ir';
+export const SYSTEM_DESIGNER_PHONE = '09133759857';
+export const SYSTEM_DESIGNER_PHONE_FA = '۰۹۱۳۳۷۵۹۸۵۷';
+
+export const SYSTEM_DEVELOPER_PROFILE = {
+  name: 'علیرضا شریعتی کمال آبادی',
+  role: 'کارشناس قرآن، عترت و نماز',
+  title: 'طراح و برنامه‌نویس سامانه',
+  website: 'arshadevelop.ir',
+  websiteUrl: 'https://arshadevelop.ir',
+  phone: '09133759857',
+  phoneDisplay: '۰۹۱۳۳۷۵۹۸۵۷',
+};
 
 export interface SystemSettings {
   officeTitle: string; // نام اداره آموزش و پرورش (مثلاً: اداره آموزش و پرورش ناحیه ۶ اصفهان)
@@ -121,6 +135,8 @@ export interface SystemSettings {
   academicYear: string; // سال تحصیلی مثلاً ۱۴۰۳-۱۴۰۴
   lastBackupDate?: string;
   developerName?: string; // طراح و برنامه‌نویس سیستم (دائمی و غیرقابل تغییر)
+  developerWebsite?: string; // وب‌سایت طراح (دائمی)
+  developerPhone?: string; // شماره تماس طراح (دائمی)
   selectedFont?: AppFont; // فونت قالب برنامه: وزیری | میترا | تیتر | نستعلیق
 }
 

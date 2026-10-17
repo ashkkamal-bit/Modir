@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { AppDatabase, PROGRAM_SECTIONS, SYSTEM_DESIGNER_NAME } from '../types';
+import { AppDatabase, PROGRAM_SECTIONS, SYSTEM_DESIGNER_NAME, SYSTEM_DESIGNER_WEBSITE, SYSTEM_DESIGNER_PHONE } from '../types';
 import { calculateEmployeeStats, calculateProgramStats, calculateSchoolStats } from './storage';
 import { getCurrentJalaliDate, getCurrentJalaliYear, updateJalaliDateToCurrentYear, toPersianDigits } from './jalali';
 
@@ -32,6 +32,8 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
     ['سال تحصیلی رسمی', dynamicAcademicYear],
     ['تاریخ صدور این فایل گزارش (شمسی)', currentJalaliDate],
     ['طراح و برنامه‌نویس سامانه', SYSTEM_DESIGNER_NAME],
+    ['تارنما و وب‌سایت طراح', SYSTEM_DESIGNER_WEBSITE],
+    ['شماره تماس و پشتیبانی', SYSTEM_DESIGNER_PHONE],
     ['تعداد کل همکاران ثبت‌شده', db.employees.length],
     ['تعداد کل آموزشگاه‌ها و مدارس', db.schools.length],
     ['تعداد کل طرح‌ها و برنامه‌ها', db.programs.length],

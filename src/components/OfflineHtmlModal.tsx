@@ -12,7 +12,7 @@ import {
   FileText,
   Eye,
 } from 'lucide-react';
-import { AppDatabase, SYSTEM_DESIGNER_NAME } from '../types';
+import { AppDatabase, SYSTEM_DESIGNER_NAME, SYSTEM_DESIGNER_WEBSITE, SYSTEM_DESIGNER_PHONE } from '../types';
 import { exportFullHtmlReport, openHtmlReportInNewTab } from '../utils/htmlExport';
 import {
   exportCompleteStandaloneApp,
@@ -109,7 +109,13 @@ export const OfflineHtmlModal: React.FC<OfflineHtmlModalProps> = ({ isOpen, onCl
                 {db?.settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'}
               </span>
               <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-                طراح: <strong className="text-emerald-700">{SYSTEM_DESIGNER_NAME}</strong>
+                طراح و برنامه‌نویس: <strong className="text-emerald-700">{SYSTEM_DESIGNER_NAME}</strong>
+              </span>
+              <span className="text-[11px] font-mono text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                {SYSTEM_DESIGNER_WEBSITE}
+              </span>
+              <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                {SYSTEM_DESIGNER_PHONE}
               </span>
             </div>
             <h3 className="text-lg font-black text-slate-900 leading-tight">

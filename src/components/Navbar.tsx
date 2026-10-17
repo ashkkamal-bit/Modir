@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { SystemSettings, Employee, AppDatabase, SYSTEM_DESIGNER_NAME } from '../types';
+import {
+  SystemSettings,
+  Employee,
+  AppDatabase,
+  SYSTEM_DESIGNER_NAME,
+  SYSTEM_DESIGNER_WEBSITE,
+  SYSTEM_DESIGNER_PHONE,
+  SYSTEM_DESIGNER_PHONE_FA,
+  SYSTEM_DEVELOPER_PROFILE,
+} from '../types';
 import { padZero } from '../utils/jalali';
 import { exportFullHtmlReport } from '../utils/htmlExport';
 import {
@@ -19,6 +28,8 @@ import {
   Trophy,
   Upload,
   Layers,
+  Phone,
+  Globe,
 } from 'lucide-react';
 import { OfflineHtmlModal } from './OfflineHtmlModal';
 import { IsfahanEmblem, IsfahanTileBorder } from './IsfahanMotifs';
@@ -87,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'schools_report', label: 'گزارش مدارس', icon: Building2 },
     { id: 'programs_report', label: 'گزارش طرح‌ها', icon: BookOpen },
     { id: 'excel_export', label: 'مرکز خروجی‌ها (HTML/Excel)', icon: FileSpreadsheet },
-    { id: 'backup_settings', label: 'پشتیبان و تنظیمات', icon: ShieldCheck },
+    { id: 'backup_settings', label: 'پشتیبان‌گیری و بازیابی', icon: ShieldCheck },
     { id: 'guide', label: 'راهنما', icon: HelpCircle },
   ];
 
@@ -110,14 +121,36 @@ export const Navbar: React.FC<NavbarProps> = ({
               <h1 className="text-sm sm:text-base font-black text-slate-900 leading-tight">
                 سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان
               </h1>
-              <div className="flex items-center gap-2 text-[10px] hidden sm:flex mt-0.5">
+              <div className="flex flex-wrap items-center gap-2 text-[10px] hidden sm:flex mt-0.5">
                 <span className="text-teal-700 font-medium">
                   {settings.departmentTitle} | {settings.academicYear}
                 </span>
                 <span className="text-slate-300">•</span>
-                <span className="text-slate-500 font-medium">
-                  طراح: <strong className="text-slate-800">{SYSTEM_DESIGNER_NAME}</strong>
+                <span className="text-slate-600 font-medium">
+                  طراح و برنامه‌نویس: <strong className="text-slate-800">{SYSTEM_DESIGNER_NAME}</strong>
                 </span>
+                <span className="text-slate-300">•</span>
+                <a
+                  href={SYSTEM_DEVELOPER_PROFILE.websiteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-0.5 transition-colors"
+                  title="ورود به تارنمای طراح سامانه"
+                >
+                  <Globe className="w-2.5 h-2.5" />
+                  <span className="font-mono">{SYSTEM_DESIGNER_WEBSITE}</span>
+                </a>
+                <span className="text-slate-300">•</span>
+                <a
+                  href={`tel:${SYSTEM_DESIGNER_PHONE}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-emerald-700 hover:text-emerald-900 font-bold font-mono flex items-center gap-0.5 transition-colors"
+                  title="تماس با طراح سامانه"
+                >
+                  <Phone className="w-2.5 h-2.5" />
+                  <span>{SYSTEM_DESIGNER_PHONE_FA}</span>
+                </a>
               </div>
             </div>
           </div>

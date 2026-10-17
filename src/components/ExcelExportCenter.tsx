@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppDatabase, SYSTEM_DESIGNER_NAME } from '../types';
+import { AppDatabase, SYSTEM_DESIGNER_NAME, SYSTEM_DESIGNER_WEBSITE, SYSTEM_DESIGNER_PHONE } from '../types';
 import { exportFullExcelReport } from '../utils/excelExport';
 import { exportFullHtmlReport, openHtmlReportInNewTab } from '../utils/htmlExport';
 import { exportCompleteStandaloneApp } from '../utils/standaloneAppExport';
@@ -74,6 +74,12 @@ export const ExcelExportCenter: React.FC<ExcelExportCenterProps> = ({ db, onNavi
             </span>
             <span className="text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
               طراح: <strong className="text-emerald-700">{SYSTEM_DESIGNER_NAME}</strong>
+            </span>
+            <span className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
+              {SYSTEM_DESIGNER_WEBSITE}
+            </span>
+            <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+              {SYSTEM_DESIGNER_PHONE}
             </span>
           </div>
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">

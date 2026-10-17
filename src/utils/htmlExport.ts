@@ -1,4 +1,4 @@
-import { AppDatabase, PROGRAM_SECTIONS, SYSTEM_DESIGNER_NAME } from '../types';
+import { AppDatabase, PROGRAM_SECTIONS, SYSTEM_DESIGNER_NAME, SYSTEM_DESIGNER_WEBSITE, SYSTEM_DESIGNER_PHONE } from '../types';
 import { calculateEmployeeStats, calculateProgramStats, calculateSchoolStats } from './storage';
 import { toPersianDigits, getCurrentJalaliDate } from './jalali';
 
@@ -356,7 +356,7 @@ export function generateHtmlReportContent(db: AppDatabase): string {
         <span style="font-size: 20px;">📄</span>
         <div>
           <h2>خروجی رسمی پرونده ارزشیابی عملکرد (۵ حوزه تخصصی با ضرایب ۱ تا ۳)</h2>
-          <p style="font-size: 11px; opacity: 0.8;">${settings.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'} | طراح و برنامه‌نویس: ${SYSTEM_DESIGNER_NAME}</p>
+          <p style="font-size: 11px; opacity: 0.8;">${settings.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'} | طراح و برنامه‌نویس: ${SYSTEM_DESIGNER_NAME} (${SYSTEM_DESIGNER_WEBSITE} - ${SYSTEM_DESIGNER_PHONE})</p>
         </div>
       </div>
       <button class="btn" onclick="window.print()">
@@ -382,6 +382,8 @@ export function generateHtmlReportContent(db: AppDatabase): string {
           <div><strong>سال تحصیلی:</strong> ${settings.academicYear}</div>
           <div><strong>تاریخ صدور گزارش:</strong> ${toPersianDigits(todayJalali)}</div>
           <div><strong>طراح و برنامه‌نویس:</strong> ${SYSTEM_DESIGNER_NAME}</div>
+          <div><strong>تارنما:</strong> <a href="https://${SYSTEM_DESIGNER_WEBSITE}" target="_blank" style="color: #2563eb; text-decoration: underline;">${SYSTEM_DESIGNER_WEBSITE}</a></div>
+          <div><strong>شماره تماس:</strong> <a href="tel:${SYSTEM_DESIGNER_PHONE}" style="color: #059669; text-decoration: underline;">${SYSTEM_DESIGNER_PHONE}</a></div>
           <div><strong>سیستم ارزیابی:</strong> ضرایب ۱ تا ۳ برای طرح‌های مهم</div>
         </div>
       </div>
@@ -695,7 +697,7 @@ export function generateHtmlReportContent(db: AppDatabase): string {
     <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #64748b; border-top: 1px solid var(--slate-200); padding-top: 16px;">
       <div>این گزارش رسمی توسط سامانه هوشمند ارزشیابی عملکرد ${settings.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'} صادر شده است.</div>
       <div style="margin-top: 6px; font-weight: 700; color: #1e293b;">
-        طراح و برنامه‌نویس سامانه: ${SYSTEM_DESIGNER_NAME}
+        طراح و برنامه‌نویس سامانه: ${SYSTEM_DESIGNER_NAME} | وب‌سایت: <a href="https://${SYSTEM_DESIGNER_WEBSITE}" target="_blank" style="color: #2563eb;">${SYSTEM_DESIGNER_WEBSITE}</a> | شماره تماس: <a href="tel:${SYSTEM_DESIGNER_PHONE}" style="color: #059669;">${SYSTEM_DESIGNER_PHONE}</a>
       </div>
     </div>
   </div>

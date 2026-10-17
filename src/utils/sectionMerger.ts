@@ -5,6 +5,8 @@ import {
   ExecutionStatus,
   SystemSettings,
   SYSTEM_DESIGNER_NAME,
+  SYSTEM_DESIGNER_WEBSITE,
+  SYSTEM_DESIGNER_PHONE,
 } from '../types';
 import { normalizePersianText } from './storage';
 import { toPersianDigits, getCurrentJalaliDate, padZero } from './jalali';
@@ -674,6 +676,8 @@ export function exportMergedMultiSectionExcel(
     ['عنوان گزارش', 'گزارش تجمیعی و میکس‌شده بخش‌های پنج‌گانه'],
     ['اداره متبوع', settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان'],
     ['طراح و برنامه‌نویس', SYSTEM_DESIGNER_NAME],
+    ['وب‌سایت طراح', SYSTEM_DESIGNER_WEBSITE],
+    ['شماره تماس و پشتیبانی', SYSTEM_DESIGNER_PHONE],
     ['سال تحصیلی', settings?.academicYear || 'سال تحصیلی جاری'],
     ['تاریخ صدور گزارش', result.generatedAt],
     ['تعداد بخش‌های میکس‌شده', `${result.sectionsCount} از ۵ بخش (${result.sectionsList.join('، ')})`],
@@ -966,6 +970,8 @@ export function exportMergedMultiSectionHtml(
           <div><strong>سال تحصیلی:</strong> ${academicYear}</div>
           <div><strong>تاریخ میکس و صدور:</strong> ${toPersianDigits(result.generatedAt)}</div>
           <div><strong>طراح و برنامه‌نویس:</strong> ${developerName}</div>
+          <div><strong>تارنما:</strong> <a href="https://${SYSTEM_DESIGNER_WEBSITE}" target="_blank" style="color: #60a5fa;">${SYSTEM_DESIGNER_WEBSITE}</a></div>
+          <div><strong>تماس:</strong> <a href="tel:${SYSTEM_DESIGNER_PHONE}" style="color: #34d399;">${SYSTEM_DESIGNER_PHONE}</a></div>
           <div><strong>بخش‌های ترکیب‌شده:</strong> ${toPersianDigits(result.sectionsCount)} از ۵ بخش</div>
         </div>
       </div>
@@ -1161,7 +1167,7 @@ export function exportMergedMultiSectionHtml(
     <div class="footer">
       <div>این گزارش رسمی توسط ماژول میکس و تجمیع گزارش‌های اکسل ${officeTitle} تدوین شده است.</div>
       <div style="margin-top: 6px; font-weight: 700; color: #1e293b;">
-        طراح و برنامه‌نویس سامانه: ${developerName}
+        طراح و برنامه‌نویس سامانه: ${developerName} | تارنما: <a href="https://${SYSTEM_DESIGNER_WEBSITE}" target="_blank" style="color: #2563eb;">${SYSTEM_DESIGNER_WEBSITE}</a> | تماس: <a href="tel:${SYSTEM_DESIGNER_PHONE}" style="color: #059669;">${SYSTEM_DESIGNER_PHONE}</a>
       </div>
     </div>
   </div>

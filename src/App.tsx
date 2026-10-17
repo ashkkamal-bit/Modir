@@ -7,6 +7,10 @@ import {
   EmployeeProgram,
   SystemSettings,
   SYSTEM_DESIGNER_NAME,
+  SYSTEM_DESIGNER_WEBSITE,
+  SYSTEM_DESIGNER_PHONE,
+  SYSTEM_DESIGNER_PHONE_FA,
+  SYSTEM_DEVELOPER_PROFILE,
 } from './types';
 import {
   loadDatabase,
@@ -634,9 +638,25 @@ export default function App() {
               {db.settings.officeTitle} — {db.settings.departmentTitle}
             </span>
           </div>
-          <span className="text-slate-400">
-            سامانه ارزشیابی عملکرد نیروهای آموزش و پرورش ناحیه ۶ اصفهان | طراح و برنامه‌نویس: <strong className="text-slate-700">{SYSTEM_DESIGNER_NAME}</strong>
-          </span>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-slate-500 text-[11px]">
+            <span>طراح و برنامه‌نویس: <strong className="text-slate-800">{SYSTEM_DESIGNER_NAME}</strong></span>
+            <span className="text-slate-300">•</span>
+            <a
+              href={SYSTEM_DEVELOPER_PROFILE.websiteUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-600 hover:text-blue-800 font-bold transition-colors"
+            >
+              وب‌سایت: {SYSTEM_DESIGNER_WEBSITE}
+            </a>
+            <span className="text-slate-300">•</span>
+            <a
+              href={`tel:${SYSTEM_DESIGNER_PHONE}`}
+              className="text-emerald-700 hover:text-emerald-900 font-bold font-mono transition-colors"
+            >
+              تماس: {SYSTEM_DESIGNER_PHONE_FA}
+            </a>
+          </div>
         </div>
       </footer>
 

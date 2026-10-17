@@ -1,4 +1,15 @@
-import { AppDatabase, EmployeeStats, EmployeeProgram, Employee, Program, SchoolStats, ScopeDetailedStats, SYSTEM_DESIGNER_NAME } from '../types';
+import {
+  AppDatabase,
+  EmployeeStats,
+  EmployeeProgram,
+  Employee,
+  Program,
+  SchoolStats,
+  ScopeDetailedStats,
+  SYSTEM_DESIGNER_NAME,
+  SYSTEM_DESIGNER_WEBSITE,
+  SYSTEM_DESIGNER_PHONE,
+} from '../types';
 import { getInitialDatabase } from './sampleData';
 import { getCurrentJalaliYear, updateJalaliDateToCurrentYear, toPersianDigits } from './jalali';
 
@@ -134,10 +145,130 @@ export function loadDatabase(): AppDatabase {
   }
 }
 
+const SNAPSHOTS_KEY = 'parvareshi_app_snapshots_v1';
+
+export interface LocalDatabaseSnapshot {
+  id: string;
+  createdAt: string;
+  label: string;
+  employeeCount: number;
+  programCount: number;
+  schoolCount: number;
+  assignmentCount: number;
+  db: AppDatabase;
+}
+
+export function saveLocalSnapshot(db: AppDatabase, label: string = 'پشتیبان خودکار'): LocalDatabaseSnapshot[] {
+  try {
+    const raw = localStorage.getItem(SNAPSHOTS_KEY);
+    const existing: LocalDatabaseSnapshot[] = raw ? JSON.parse(raw) : [];
+    const now = new Date();
+    const newSnapshot: LocalDatabaseSnapshot = {
+      id: `snap_${Date.now()}`,
+      createdAt: `${now.toLocaleDateString('fa-IR')} ساعت ${now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`,
+      label,
+      employeeCount: db.employees?.length || 0,
+      programCount: db.programs?.length || 0,
+      schoolCount: db.schools?.length || 0,
+      assignmentCount: db.employeePrograms?.length || 0,
+      db: JSON.parse(JSON.stringify(db)),
+    };
+    const updated = [newSnapshot, ...existing].slice(0, 10);
+    localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (e) {
+    console.error('Failed to save local snapshot:', e);
+    return [];
+  }
+}
+
+export function getLocalSnapshots(): LocalDatabaseSnapshot[] {
+  try {
+    const raw = localStorage.getItem(SNAPSHOTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function restoreLocalSnapshot(snapshotId: string): AppDatabase | null {
+  const snapshots = getLocalSnapshots();
+  const found = snapshots.find((s) => s.id === snapshotId);
+  if (!found) return null;
+  saveDatabase(found.db);
+  return found.db;
+}
+
+export function deleteLocalSnapshot(snapshotId: string): LocalDatabaseSnapshot[] {
+  const snapshots = getLocalSnapshots().filter((s) => s.id !== snapshotId);
+  localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+  return snapshots;
+}
+
+export interface BackupInspectionResult {
+  isValid: boolean;
+  error?: string;
+  employeesCount: number;
+  programsCount: number;
+  schoolsCount: number;
+  assignmentsCount: number;
+  officeTitle: string;
+  academicYear: string;
+}
+
+export function inspectBackupJson(jsonString: string): BackupInspectionResult {
+  try {
+    let parsed = JSON.parse(jsonString.trim());
+    if (parsed.database && typeof parsed.database === 'object') parsed = parsed.database;
+    else if (parsed.db && typeof parsed.db === 'object') parsed = parsed.db;
+
+    const employees = parsed.employees || parsed.colleagues || parsed.staff || [];
+    const programs = parsed.programs || parsed.plans || parsed.tarhha || [];
+    const employeePrograms = parsed.employeePrograms || parsed.assignments || parsed.tarhayeEjraei || [];
+    const schools = parsed.schools || parsed.madares || [];
+
+    if (!Array.isArray(employees) && !Array.isArray(programs)) {
+      return {
+        isValid: false,
+        error: 'فایل فاقد ساختار آرایه همکاران یا طرح‌ها می‌باشد.',
+        employeesCount: 0,
+        programsCount: 0,
+        schoolsCount: 0,
+        assignmentsCount: 0,
+        officeTitle: '',
+        academicYear: '',
+      };
+    }
+
+    return {
+      isValid: true,
+      employeesCount: Array.isArray(employees) ? employees.length : 0,
+      programsCount: Array.isArray(programs) ? programs.length : 0,
+      schoolsCount: Array.isArray(schools) ? schools.length : 0,
+      assignmentsCount: Array.isArray(employeePrograms) ? employeePrograms.length : 0,
+      officeTitle: parsed.settings?.officeTitle || 'اداره آموزش و پرورش ناحیه ۶ اصفهان',
+      academicYear: parsed.settings?.academicYear || 'سال تحصیلی جاری',
+    };
+  } catch (err: any) {
+    return {
+      isValid: false,
+      error: 'فرمت داده‌های JSON نامعتبر است: ' + err.message,
+      employeesCount: 0,
+      programsCount: 0,
+      schoolsCount: 0,
+      assignmentsCount: 0,
+      officeTitle: '',
+      academicYear: '',
+    };
+  }
+}
+
 export function saveDatabase(db: AppDatabase): void {
   try {
     if (db && db.settings) {
       db.settings.developerName = SYSTEM_DESIGNER_NAME;
+      db.settings.developerWebsite = SYSTEM_DESIGNER_WEBSITE;
+      db.settings.developerPhone = SYSTEM_DESIGNER_PHONE;
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
   } catch (err) {
@@ -146,13 +277,16 @@ export function saveDatabase(db: AppDatabase): void {
 }
 
 export function exportDatabaseAsJson(db: AppDatabase): void {
+  // Save an automatic local snapshot before user downloads
+  saveLocalSnapshot(db, 'پشتیبان‌گیری دستی (دانلود فایل)');
   const jsonStr = JSON.stringify(db, null, 2);
   const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  const timestamp = new Date().toISOString().slice(0, 10);
-  link.download = `parvareshi_backup_${timestamp}.json`;
+  const now = new Date();
+  const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  link.download = `backup_parvareshi_isfahan6_${timestamp}.json`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -240,16 +374,21 @@ export function importDatabaseFromJson(jsonString: string): AppDatabase {
       ...(parsed.settings || {}),
       officeTitle: 'اداره آموزش و پرورش ناحیه ۶ اصفهان',
       developerName: SYSTEM_DESIGNER_NAME,
+      developerWebsite: SYSTEM_DESIGNER_WEBSITE,
+      developerPhone: SYSTEM_DESIGNER_PHONE,
     },
     version: parsed.version || 1,
   };
 
+  // Snapshot before overwriting
+  saveLocalSnapshot(validDb, 'بازیابی از فایل JSON');
   saveDatabase(validDb);
   return validDb;
 }
 
 export function resetDatabaseToDefault(): AppDatabase {
   const initial = getInitialDatabase();
+  saveLocalSnapshot(initial, 'بازگردانی به پیش‌فرض کارخانه');
   saveDatabase(initial);
   return initial;
 }

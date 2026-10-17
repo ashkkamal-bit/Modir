@@ -1,5 +1,5 @@
 import { getCurrentJalaliYear, toPersianDigits } from './jalali';
-import { AppDatabase, School, Employee, Program, EmployeeProgram } from '../types';
+import { AppDatabase, School, Employee, Program, EmployeeProgram, SYSTEM_DESIGNER_NAME, SYSTEM_DESIGNER_WEBSITE, SYSTEM_DESIGNER_PHONE } from '../types';
 
 export const INITIAL_SCHOOLS: School[] = [
   {
@@ -539,7 +539,9 @@ export const INITIAL_SETTINGS = {
   officerName: 'کارشناس مسئول ارزیابی عملکرد',
   academicYear: `سال تحصیلی ${toPersianDigits(getCurrentJalaliYear())}-${toPersianDigits(Number(getCurrentJalaliYear()) + 1)}`,
   lastBackupDate: '',
-  developerName: 'علیرضا شریعتی کمال آبادی کارشناس قرآن،عترت و نماز',
+  developerName: SYSTEM_DESIGNER_NAME,
+  developerWebsite: SYSTEM_DESIGNER_WEBSITE,
+  developerPhone: SYSTEM_DESIGNER_PHONE,
 };
 
 export function getInitialDatabase(): AppDatabase {
