@@ -64,6 +64,10 @@ export default function App() {
   const [assignPreselectedEmpId, setAssignPreselectedEmpId] = useState<string | undefined>();
   const [assignPreselectedPrgId, setAssignPreselectedPrgId] = useState<string | undefined>();
 
+  // Excel Bulk Import navigation target
+  const [excelImportMode, setExcelImportMode] = useState<'employees' | 'tasks' | 'per_program' | 'programs'>('employees');
+  const [excelImportProgramId, setExcelImportProgramId] = useState<string | undefined>();
+
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -525,6 +529,15 @@ export default function App() {
             onDeleteProgram={handleDeleteProgram}
             onOpenAssignModal={(prgId) => handleOpenAssignModal(undefined, prgId)}
             onToggleActive={handleToggleProgramActive}
+            onNavigateToExcelImport={() => {
+              setExcelImportMode('programs');
+              setCurrentTab('excel_import');
+            }}
+            onNavigateToPerProgramBulk={(prgId) => {
+              setExcelImportMode('per_program');
+              setExcelImportProgramId(prgId);
+              setCurrentTab('excel_import');
+            }}
           />
         )}
 
@@ -598,6 +611,8 @@ export default function App() {
             db={db}
             onUpdateDatabase={updateDatabase}
             onNavigateToTab={setCurrentTab}
+            initialMode={excelImportMode}
+            initialProgramId={excelImportProgramId}
           />
         )}
 

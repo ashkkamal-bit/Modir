@@ -277,5 +277,73 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
   XLSX.utils.book_append_sheet(wb, ws4, 'گزارش آموزشگاه‌ها');
 
   const dateStr = currentJalaliDate.replace(/\//g, '-');
-  XLSX.writeFile(wb, `${filenamePrefix}_${dateStr}.xlsx`);
+  safeDownloadWorkbook(wb, `${filenamePrefix}_${dateStr}.xlsx`);
+}
+
+/**
+ * Robust workbook downloader that works across iframes, mobile devices, and strict sandbox policies.
+ * Uses Blob object URL with document link click first, then falls back to XLSX.writeFile.
+ */
+export function safeDownloadWorkbook(wb: XLSX.WorkBook, filename: string): boolean {
+  const safeFilename = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
+  try {
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = safeFilename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      try {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        // ignore cleanup errors
+      }
+    }, 400);
+    return true;
+  } catch (err) {
+    console.warn('Blob download failed, falling back to XLSX.writeFile:', err);
+    try {
+      XLSX.writeFile(wb, safeFilename);
+      return true;
+    } catch (err2) {
+      console.error('All workbook download methods failed:', err2);
+      return false;
+    }
+  }
+}
+
+/**
+ * Robust CSV downloader with UTF-8 BOM so Microsoft Excel renders Persian characters perfectly.
+ */
+export function safeDownloadCsv(csvContent: string, filename: string): boolean {
+  const safeFilename = filename.endsWith('.csv') ? filename : `${filename}.csv`;
+  try {
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = safeFilename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      try {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        // ignore cleanup errors
+      }
+    }, 400);
+    return true;
+  } catch (err) {
+    console.error('CSV download failed:', err);
+    return false;
+  }
 }

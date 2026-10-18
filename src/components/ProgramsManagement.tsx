@@ -11,6 +11,8 @@ import {
   Calendar,
   AlertTriangle,
   Layers,
+  Upload,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 interface ProgramsManagementProps {
@@ -20,6 +22,8 @@ interface ProgramsManagementProps {
   onDeleteProgram: (programId: string) => void;
   onOpenAssignModal: (programId: string) => void;
   onToggleActive: (programId: string) => void;
+  onNavigateToExcelImport?: () => void;
+  onNavigateToPerProgramBulk?: (programId: string) => void;
 }
 
 export const ProgramsManagement: React.FC<ProgramsManagementProps> = ({
@@ -29,6 +33,8 @@ export const ProgramsManagement: React.FC<ProgramsManagementProps> = ({
   onDeleteProgram,
   onOpenAssignModal,
   onToggleActive,
+  onNavigateToExcelImport,
+  onNavigateToPerProgramBulk,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSection, setFilterSection] = useState<string>('all');
@@ -127,13 +133,25 @@ export const ProgramsManagement: React.FC<ProgramsManagementProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={onOpenNewProgramModal}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>تعریف برنامه / طرح جدید</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {onNavigateToExcelImport && (
+            <button
+              onClick={onNavigateToExcelImport}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+            >
+              <Upload className="w-4 h-4 text-indigo-600" />
+              <span>ورود گروهی طرح‌ها از Excel</span>
+            </button>
+          )}
+
+          <button
+            onClick={onOpenNewProgramModal}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>تعریف برنامه / طرح جدید</span>
+          </button>
+        </div>
       </div>
 
       {/* 5 Sections Quick Filter Tabs */}
@@ -322,18 +340,31 @@ export const ProgramsManagement: React.FC<ProgramsManagementProps> = ({
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] text-slate-500">
                   وزن در رتبه‌بندی: <strong>{toPersianDigits(coeff)} برابر</strong>
                 </span>
-                <button
-                  type="button"
-                  onClick={() => onOpenAssignModal(prg.id)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 hover:bg-teal-600 hover:text-white text-teal-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>تخصیص به همکاران</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  {onNavigateToPerProgramBulk && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigateToPerProgramBulk(prg.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                      title="ورود گروهی عملکرد این طرح از اکسل یا ثبت مستقیم"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      <span>ورود گروهی این طرح</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onOpenAssignModal(prg.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 hover:bg-teal-600 hover:text-white text-teal-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>تخصیص</span>
+                  </button>
+                </div>
               </div>
             </div>
           );
