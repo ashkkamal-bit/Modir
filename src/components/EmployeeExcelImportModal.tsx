@@ -9,6 +9,7 @@ import {
 } from '../types';
 import { normalizePersianText } from '../utils/storage';
 import { toPersianDigits, getCurrentJalaliDate, padZero } from '../utils/jalali';
+import { safeDownloadWorkbook } from '../utils/excelExport';
 import {
   FileSpreadsheet,
   Upload,
@@ -595,6 +596,28 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         '09135556677',
         'مدیر با سابقه و هماهنگ‌کننده طرح‌ها',
       ],
+      [
+        '1281234567',
+        '201006',
+        'مریم ابراهیمی',
+        'دبستان نور دانش',
+        'ابتدایی دوره اول',
+        'رابط پرورشی',
+        '6',
+        '09134445566',
+        'رابط پرورشی فعال و پیگیر در اجرای برنامه‌های فرهنگی و تربیتی',
+      ],
+      [
+        '1298877665',
+        '201007',
+        'علی اکبری',
+        'دبیرستان امیرکبیر',
+        'متوسطه اول',
+        'مربی پرورشی',
+        '10',
+        '09135556677',
+        'مربی پرورشی توانمند و مجری اردوها و مسابقات فرهنگی',
+      ],
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(data);
@@ -611,7 +634,7 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, 'مشخصات همکاران');
-    XLSX.writeFile(wb, 'الگوی_اکسل_مشخصات_همکاران_ناحیه۶.xlsx');
+    safeDownloadWorkbook(wb, 'الگوی_اکسل_مشخصات_همکاران_ناحیه۶.xlsx');
   };
 
   return (

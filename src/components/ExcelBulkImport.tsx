@@ -455,8 +455,11 @@ export const ExcelBulkImport: React.FC<ExcelBulkImportProps> = ({
 
   const normalizeRole = (raw: string): string => {
     const n = normalizePersianText(raw);
+    if (n.includes('رابط') && (n.includes('پرورشی') || n.includes('فرهنگی') || n.includes('تربیتی'))) return 'رابط پرورشی';
+    if (n === 'رابط' || n.includes('رابط')) return 'رابط پرورشی';
     if (n.includes('معاون') && n.includes('پرورشی')) return 'معاون پرورشی';
-    if (n.includes('مربی') && n.includes('پرورشی')) return 'مربی پرورشی';
+    if (n.includes('مربی') && (n.includes('پرورشی') || n.includes('تربیتی') || n.includes('امور تربیتی'))) return 'مربی پرورشی';
+    if (n === 'مربی' || n.startsWith('مربی')) return 'مربی پرورشی';
     if (n.includes('مشاور')) return 'مشاور مدرسه';
     if (n.includes('مدیر')) return 'مدیر مدرسه';
     if (n.includes('آموزگار')) return 'آموزگار';
@@ -1448,6 +1451,28 @@ export const ExcelBulkImport: React.FC<ExcelBulkImportProps> = ({
           '8',
           '09133334455',
           'آموزگار توانمند پایه پنجم',
+        ],
+        [
+          '1281234567',
+          '201004',
+          'مریم ابراهیمی',
+          'دبستان نور دانش',
+          'ابتدایی دوره اول',
+          'رابط پرورشی',
+          '6',
+          '09134445566',
+          'رابط پرورشی پویا و فعال در برنامه‌های فرهنگی',
+        ],
+        [
+          '1298877665',
+          '201005',
+          'علی اکبری',
+          'دبیرستان امیرکبیر',
+          'متوسطه اول',
+          'مربی پرورشی',
+          '10',
+          '09135556677',
+          'مربی پرورشی فعال در تشکل‌های دانش‌آموزی و مسابقات فرهنگی',
         ],
       ];
 

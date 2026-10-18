@@ -68,6 +68,33 @@ export default function App() {
   const [excelImportMode, setExcelImportMode] = useState<'employees' | 'tasks' | 'per_program' | 'programs'>('employees');
   const [excelImportProgramId, setExcelImportProgramId] = useState<string | undefined>();
 
+  // Font Store (https://github.com/font-store) typography state
+  const [selectedFont, setSelectedFont] = useState<string>(() => {
+    try {
+      return localStorage.getItem('app_preferred_font') || 'yekan';
+    } catch {
+      return 'yekan';
+    }
+  });
+
+  useEffect(() => {
+    const fontMap: Record<string, string> = {
+      yekan: "'font-store-yekan', 'yekan', 'Vazirmatn', sans-serif",
+      behdad: "'font-store-behdad', 'behdad', 'Vazirmatn', sans-serif",
+      nika: "'font-store-nika', 'nika', 'Vazirmatn', sans-serif",
+      shahab: "'font-store-shahab', 'shahab', 'Vazirmatn', sans-serif",
+      vazir: "'Vazirmatn', 'font-store-yekan', sans-serif",
+    };
+    const fontVal = fontMap[selectedFont] || fontMap.yekan;
+    document.documentElement.style.setProperty('--app-font', fontVal);
+    document.body.style.fontFamily = fontVal;
+    try {
+      localStorage.setItem('app_preferred_font', selectedFont);
+    } catch {
+      // ignore storage error
+    }
+  }, [selectedFont]);
+
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -432,6 +459,8 @@ export default function App() {
         onQuickJump={handleQuickJump}
         onOpenAssignModal={() => handleOpenAssignModal()}
         db={db}
+        selectedFont={selectedFont}
+        onSelectFont={setSelectedFont}
       />
 
       {/* Main Content Area */}
@@ -636,6 +665,8 @@ export default function App() {
             db={db}
             onUpdateDatabase={updateDatabase}
             onUpdateSettings={handleUpdateSettings}
+            selectedFont={selectedFont}
+            onSelectFont={setSelectedFont}
           />
         )}
 

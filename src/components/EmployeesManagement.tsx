@@ -56,10 +56,12 @@ const ROLES_LIST: { id: string; label: string }[] = [
   { id: 'مدیر', label: '۱. مدیر' },
   { id: 'معاون آموزشی', label: '۲. معاون آموزشی' },
   { id: 'معاون پرورشی', label: '۳. معاون پرورشی' },
-  { id: 'دبیر', label: '۴. دبیر' },
-  { id: 'آموزگار', label: '۵. آموزگار' },
-  { id: 'معاون اجرایی', label: '۶. معاون اجرایی' },
-  { id: 'سایر', label: '۷. سایر سمت‌ها' },
+  { id: 'مربی پرورشی', label: '۴. مربی پرورشی' },
+  { id: 'رابط پرورشی', label: '۵. رابط پرورشی' },
+  { id: 'دبیر', label: '۶. دبیر' },
+  { id: 'آموزگار', label: '۷. آموزگار' },
+  { id: 'معاون اجرایی', label: '۸. معاون اجرایی' },
+  { id: 'سایر', label: '۹. سایر سمت‌ها' },
 ];
 
 function normalizeText(str?: string | null): string {
@@ -258,11 +260,15 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
 
       if (roleFilter !== 'all') {
         if (roleFilter === 'سایر') {
-          const coreSix = new Set(['مدیر', 'معاون آموزشی', 'معاون پرورشی', 'دبیر', 'آموزگار', 'معاون اجرایی']);
-          const isStandardRole = coreSix.has(emp.role) || emp.role.startsWith('معاون پرورشی');
+          const coreRoles = new Set(['مدیر', 'معاون آموزشی', 'معاون پرورشی', 'مربی پرورشی', 'رابط پرورشی', 'دبیر', 'آموزگار', 'معاون اجرایی']);
+          const isStandardRole = coreRoles.has(emp.role) || emp.role.startsWith('معاون پرورشی') || emp.role.startsWith('مربی پرورشی') || emp.role.startsWith('رابط پرورشی');
           if (isStandardRole && emp.role !== 'سایر') return false;
         } else if (roleFilter === 'معاون پرورشی') {
           if (emp.role !== 'معاون پرورشی' && !emp.role.includes('معاون پرورشی')) return false;
+        } else if (roleFilter === 'مربی پرورشی') {
+          if (emp.role !== 'مربی پرورشی' && !emp.role.includes('مربی پرورشی') && !emp.role.includes('مربی امور تربیتی')) return false;
+        } else if (roleFilter === 'رابط پرورشی') {
+          if (emp.role !== 'رابط پرورشی' && !emp.role.includes('رابط پرورشی')) return false;
         } else if (emp.role !== roleFilter) {
           return false;
         }

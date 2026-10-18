@@ -30,6 +30,7 @@ import {
   Layers,
   Phone,
   Globe,
+  Type,
 } from 'lucide-react';
 import { OfflineHtmlModal } from './OfflineHtmlModal';
 import { IsfahanEmblem, IsfahanTileBorder } from './IsfahanMotifs';
@@ -42,6 +43,8 @@ interface NavbarProps {
   onQuickJump: (code: string) => boolean;
   onOpenAssignModal: () => void;
   db: AppDatabase;
+  selectedFont?: string;
+  onSelectFont?: (font: string) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -52,6 +55,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onQuickJump,
   onOpenAssignModal,
   db,
+  selectedFont,
+  onSelectFont,
 }) => {
   const [navCode, setNavCode] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -176,6 +181,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>نسخه آفلاین</span>
             </button>
 
+            {/* Font-Store Font Selector */}
+            {onSelectFont && (
+              <div className="flex items-center gap-1.5 border-r border-slate-200 pr-2" title="فونت‌های پروژه Font-Store">
+                <Type className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <select
+                  value={selectedFont || 'yekan'}
+                  onChange={(e) => onSelectFont(e.target.value)}
+                  className="text-[11px] font-bold text-slate-700 bg-white border border-slate-300 rounded-xl px-2 py-1 outline-hidden cursor-pointer hover:border-purple-400 focus:ring-1 focus:ring-purple-500"
+                >
+                  <option value="yekan">فونت یکان (Font-Store)</option>
+                  <option value="behdad">فونت بهداد (Font-Store)</option>
+                  <option value="nika">فونت نیکا (Font-Store)</option>
+                  <option value="shahab">فونت شهاب (Font-Store)</option>
+                  <option value="vazir">فونت وزیرمتن</option>
+                </select>
+              </div>
+            )}
+
             <form onSubmit={handleNavJump} className="flex items-center gap-1.5 border-r border-slate-200 pr-2">
               <span className="text-xs font-bold text-slate-600 pr-1">کارتابل:</span>
               <input
@@ -277,6 +300,26 @@ export const Navbar: React.FC<NavbarProps> = ({
               برو
             </button>
           </form>
+
+          {onSelectFont && (
+            <div className="flex items-center justify-between p-2.5 bg-slate-800/90 rounded-xl border border-slate-700 text-xs">
+              <div className="flex items-center gap-1.5 text-purple-300 font-bold">
+                <Type className="w-3.5 h-3.5" />
+                <span>فونت نرم‌افزار (Font-Store):</span>
+              </div>
+              <select
+                value={selectedFont || 'yekan'}
+                onChange={(e) => onSelectFont(e.target.value)}
+                className="bg-slate-900 border border-slate-600 rounded-lg text-white font-bold px-2 py-1 text-xs"
+              >
+                <option value="yekan">یکان (Font-Store)</option>
+                <option value="behdad">بهداد (Font-Store)</option>
+                <option value="nika">نیکا (Font-Store)</option>
+                <option value="shahab">شهاب (Font-Store)</option>
+                <option value="vazir">وزیرمتن</option>
+              </select>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-2 text-xs">
             {menuItems.map((item) => {

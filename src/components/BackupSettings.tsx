@@ -52,6 +52,7 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   Info,
+  Type,
 } from 'lucide-react';
 import { OfflineHtmlModal } from './OfflineHtmlModal';
 import { IsfahanToranjWatermark, IsfahanEmblem } from './IsfahanMotifs';
@@ -60,12 +61,16 @@ interface BackupSettingsProps {
   db: AppDatabase;
   onUpdateDatabase: (newDb: AppDatabase) => void;
   onUpdateSettings: (settings: SystemSettings) => void;
+  selectedFont?: string;
+  onSelectFont?: (font: string) => void;
 }
 
 export const BackupSettings: React.FC<BackupSettingsProps> = ({
   db,
   onUpdateDatabase,
   onUpdateSettings,
+  selectedFont,
+  onSelectFont,
 }) => {
   const [settings, setSettings] = useState<SystemSettings>(db.settings);
   const [successMessage, setSuccessMessage] = useState('');
@@ -795,6 +800,116 @@ export const BackupSettings: React.FC<BackupSettingsProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+
+          {/* Typography Settings (Font-Store Project https://github.com/font-store) */}
+          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-purple-200 shadow-sm space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-purple-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-700 text-white flex items-center justify-center shrink-0 shadow-md">
+                  <Type className="w-5 h-5 text-amber-300" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-black text-slate-800">
+                      تنظیمات فونت و تایپوگرافی سامانه (پروژه Font-Store)
+                    </h2>
+                    <span className="text-[10px] bg-purple-100 text-purple-900 px-2 py-0.5 rounded-full font-bold">
+                      Open-Source
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    بر اساس مخزن آزاد فونت‌های فارسی <strong>https://github.com/font-store</strong>
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href="https://github.com/font-store"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 rounded-xl text-xs font-bold transition-colors"
+              >
+                <span>مشاهده پروژه Font-Store در گیت‌هاب</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              سامانه به فونت‌های رسمی پروژه Font-Store متصل است. می‌توانید فونت فعال سامانه را با یک کلیک تغییر دهید:
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {[
+                {
+                  id: 'yekan',
+                  title: 'فونت یکان (Yekan)',
+                  sub: 'محبوب‌ترین فونت استاندارد وب و سامانه‌های اداری',
+                  preview: 'آموزش و پرورش ناحیه ۶ اصفهان - ۱۴۰۳/۱۴۰۴',
+                  fontFamily: "'font-store-yekan', sans-serif",
+                },
+                {
+                  id: 'behdad',
+                  title: 'فونت بهداد (Behdad)',
+                  sub: 'قلم رسمی، وزین و چشم‌نواز اسناد آموزشی',
+                  preview: 'سامانه ارزشیابی و رتبه‌بندی عملکرد نیروها',
+                  fontFamily: "'font-store-behdad', sans-serif",
+                },
+                {
+                  id: 'nika',
+                  title: 'فونت نیکا (Nika)',
+                  sub: 'تایپ‌فیس مدرن، مینیمال و پرکاربرد دیجیتال',
+                  preview: 'ثبت گروهی وضعیت اجرای تکالیف طرح‌ها',
+                  fontFamily: "'font-store-nika', sans-serif",
+                },
+                {
+                  id: 'shahab',
+                  title: 'فونت شهاب (Shahab)',
+                  sub: 'فونت پویا با کنتراست عالی جهت خوانایی داده‌ها',
+                  preview: 'کارتابل تخصصی و امتیازهای مکتسبه همکاران',
+                  fontFamily: "'font-store-shahab', sans-serif",
+                },
+                {
+                  id: 'vazir',
+                  title: 'فونت وزیرمتن (Vazirmatn)',
+                  sub: 'فونت استاندارد گوگل و اکوسیستم آزاد فارسی',
+                  preview: 'داشبورد مدیریتی و گزارش ۵ حوزه تخصصی',
+                  fontFamily: "'Vazirmatn', sans-serif",
+                },
+              ].map((f) => {
+                const isSelected = (selectedFont || 'yekan') === f.id;
+                return (
+                  <div
+                    key={f.id}
+                    onClick={() => onSelectFont && onSelectFont(f.id)}
+                    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                      isSelected
+                        ? 'border-purple-600 bg-purple-50/50 shadow-md ring-2 ring-purple-400/30'
+                        : 'border-slate-200 bg-slate-50/60 hover:bg-white hover:border-slate-300'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-slate-800 text-sm">{f.title}</span>
+                        {isSelected && (
+                          <span className="px-2 py-0.5 bg-purple-600 text-white rounded-full text-[10px] font-bold">
+                            فعال در سامانه
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500">{f.sub}</p>
+                    </div>
+
+                    <div
+                      className="p-2.5 bg-white rounded-xl border border-slate-200 text-xs font-bold text-slate-700 leading-snug"
+                      style={{ fontFamily: f.fontFamily }}
+                    >
+                      {f.preview}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Majestic Designer Identification & Support Card */}
