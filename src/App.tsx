@@ -106,15 +106,26 @@ export default function App() {
   }, []);
 
   const updateDatabase = useCallback(
-    (newDb: AppDatabase) => {
+    (newDb: AppDatabase, customMessage?: string) => {
+      const saveRes = saveDatabase(newDb);
       setDb(newDb);
-      saveDatabase(newDb);
+
       if (selectedEmployee) {
         const synced = newDb.employees.find((e) => e.id === selectedEmployee.id);
         setSelectedEmployee(synced || newDb.employees[0] || null);
       }
+
+      if (!saveRes.success) {
+        showToast(`⚠️ خطا در ذخیره‌سازی داده‌ها: ${saveRes.error || 'داده‌ها در حافظه موقت نگهداری می‌شوند.'}`);
+      } else if (saveRes.error) {
+        // Warning or self-healing message
+        showToast(`ℹ️ ${saveRes.error}`);
+      } else if (customMessage) {
+        showToast(customMessage);
+      }
+      return saveRes;
     },
-    [selectedEmployee],
+    [selectedEmployee, showToast],
   );
 
   const handleQuickJump = useCallback(

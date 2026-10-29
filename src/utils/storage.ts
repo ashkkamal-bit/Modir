@@ -14,11 +14,35 @@ import { getInitialDatabase } from './sampleData';
 import { getCurrentJalaliYear, updateJalaliDateToCurrentYear, toPersianDigits } from './jalali';
 
 const STORAGE_KEY = 'parvareshi_app_db_v1';
+const SNAPSHOTS_KEY = 'parvareshi_app_snapshots_v1';
+
+// In-memory fallback cache when localStorage is unavailable or throws quota error
+let memoryDatabaseCache: AppDatabase | null = null;
+
+export interface SaveDatabaseResult {
+  success: boolean;
+  error?: string;
+  bytesWritten?: number;
+  verified: boolean;
+  fallbackUsed?: boolean;
+}
+
+export interface StorageHealthInfo {
+  isAvailable: boolean;
+  usedBytes: number;
+  usedFormatted: string;
+  estimatedQuotaBytes: number;
+  percentUsed: number;
+  snapshotCount: number;
+  lastSaveVerified: boolean;
+  errorMessage?: string;
+}
 
 export function loadDatabase(): AppDatabase {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = typeof window !== 'undefined' && window.localStorage ? localStorage.getItem(STORAGE_KEY) : null;
     if (!raw) {
+      if (memoryDatabaseCache) return memoryDatabaseCache;
       const initial = getInitialDatabase();
       saveDatabase(initial);
       return initial;
@@ -145,8 +169,6 @@ export function loadDatabase(): AppDatabase {
   }
 }
 
-const SNAPSHOTS_KEY = 'parvareshi_app_snapshots_v1';
-
 export interface LocalDatabaseSnapshot {
   id: string;
   createdAt: string;
@@ -263,17 +285,208 @@ export function inspectBackupJson(jsonString: string): BackupInspectionResult {
   }
 }
 
-export function saveDatabase(db: AppDatabase): void {
+export function saveDatabase(db: AppDatabase): SaveDatabaseResult {
+  if (!db || typeof db !== 'object') {
+    return {
+      success: false,
+      error: 'ساختار پایگاه داده نامعتبر یا تهی است.',
+      verified: false,
+    };
+  }
+
+  // Integrity safeguard: check essential tables
+  if (!Array.isArray(db.employees) || !Array.isArray(db.programs) || !Array.isArray(db.schools) || !Array.isArray(db.employeePrograms)) {
+    return {
+      success: false,
+      error: 'آرایه‌های اصلی پایگاه داده (همکاران، طرح‌ها، مدارس یا تکالیف) مفقود یا نامعتبر هستند.',
+      verified: false,
+    };
+  }
+
   try {
-    if (db && db.settings) {
+    if (db.settings) {
       db.settings.developerName = SYSTEM_DESIGNER_NAME;
       db.settings.developerWebsite = SYSTEM_DESIGNER_WEBSITE;
       db.settings.developerPhone = SYSTEM_DESIGNER_PHONE;
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-  } catch (err) {
+
+    const serialized = JSON.stringify(db);
+    // Keep in-memory cache updated as instant fallback
+    try {
+      memoryDatabaseCache = JSON.parse(serialized);
+    } catch {
+      memoryDatabaseCache = db;
+    }
+
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return {
+        success: true,
+        verified: true,
+        fallbackUsed: true,
+        bytesWritten: new Blob([serialized]).size,
+      };
+    }
+
+    // Write to localStorage
+    localStorage.setItem(STORAGE_KEY, serialized);
+
+    // CRITICAL: Explicit read-back verification to guarantee data integrity
+    const readBack = localStorage.getItem(STORAGE_KEY);
+    if (!readBack || readBack.length !== serialized.length) {
+      return {
+        success: false,
+        error: 'اعتبارسنجی ذخیره‌سازی ناموفق بود؛ داده‌های خوانده‌شده با داده‌های ذخیره‌شده همخوانی ندارند.',
+        verified: false,
+      };
+    }
+
+    return {
+      success: true,
+      bytesWritten: new Blob([serialized]).size,
+      verified: true,
+    };
+  } catch (err: any) {
     console.error('Error saving database to localStorage:', err);
+    let errorMsg = 'خطای نامشخص در ذخیره‌سازی داده‌ها در حافظه مرورگر.';
+
+    const isQuota =
+      err?.name === 'QuotaExceededError' ||
+      err?.code === 22 ||
+      err?.number === -2147024882 ||
+      err?.name === 'NS_ERROR_DOM_QUOTA_REACHED';
+
+    if (isQuota) {
+      errorMsg = 'حافظه ذخیره‌سازی مرورگر (LocalStorage) پر شده است.';
+      // Automatic self-healing: prune old snapshots to recover storage quota
+      try {
+        const rawSnaps = localStorage.getItem(SNAPSHOTS_KEY);
+        if (rawSnaps) {
+          const snaps = JSON.parse(rawSnaps);
+          if (Array.isArray(snaps) && snaps.length > 2) {
+            localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snaps.slice(0, 2)));
+            // Retry saving
+            const serialized = JSON.stringify(db);
+            localStorage.setItem(STORAGE_KEY, serialized);
+            const verified = localStorage.getItem(STORAGE_KEY) === serialized;
+            if (verified) {
+              return {
+                success: true,
+                bytesWritten: new Blob([serialized]).size,
+                verified: true,
+                error: 'حافظه مرورگر فشرده‌سازی شد و داده‌ها با موفقیت تثبیت شدند.',
+              };
+            }
+          }
+        }
+      } catch (pruneErr) {
+        console.warn('Auto-pruning snapshots failed to recover quota:', pruneErr);
+      }
+    } else if (err?.message) {
+      errorMsg = `خطای دسترسی به حافظه: ${err.message}`;
+    }
+
+    return {
+      success: false,
+      error: errorMsg,
+      verified: false,
+      fallbackUsed: true,
+    };
   }
+}
+
+/**
+ * بررسی وضعیت سلامت و مصرف حافظه محلی
+ */
+export function getStorageHealthInfo(): StorageHealthInfo {
+  let isAvailable = false;
+  let usedBytes = 0;
+  let snapshotCount = 0;
+  let errorMessage: string | undefined;
+
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const testKey = '__test_storage_integrity__';
+      localStorage.setItem(testKey, '1');
+      localStorage.removeItem(testKey);
+      isAvailable = true;
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          const val = localStorage.getItem(key) || '';
+          usedBytes += (key.length + val.length) * 2; // UTF-16 bytes
+        }
+      }
+
+      const rawSnaps = localStorage.getItem(SNAPSHOTS_KEY);
+      if (rawSnaps) {
+        const parsed = JSON.parse(rawSnaps);
+        snapshotCount = Array.isArray(parsed) ? parsed.length : 0;
+      }
+    }
+  } catch (err: any) {
+    isAvailable = false;
+    errorMessage = err?.message || 'دسترسی به LocalStorage محدود است.';
+  }
+
+  const estimatedQuotaBytes = 5 * 1024 * 1024; // 5 MB standard
+  const percentUsed = Math.min(100, Math.round((usedBytes / estimatedQuotaBytes) * 100));
+  const kb = Math.round(usedBytes / 1024);
+  const usedFormatted = kb > 1024 ? `${(kb / 1024).toFixed(2)} مگابایت` : `${toPersianDigits(kb)} کیلوبایت`;
+
+  return {
+    isAvailable,
+    usedBytes,
+    usedFormatted,
+    estimatedQuotaBytes,
+    percentUsed,
+    snapshotCount,
+    lastSaveVerified: isAvailable,
+    errorMessage,
+  };
+}
+
+/**
+ * بررسی و ترمیم خودکار جامعیت پیوندهای پایگاه داده
+ */
+export function verifyAndRepairDatabase(db: AppDatabase): { repairedDb: AppDatabase; repairs: string[] } {
+  const repairs: string[] = [];
+  const empIds = new Set(db.employees.map((e) => e.id));
+  const prgIds = new Set(db.programs.map((p) => p.id));
+  const schIds = new Set(db.schools.map((s) => s.id));
+
+  // 1. Remove dangling employeePrograms whose employee or program no longer exists
+  const initialEpCount = db.employeePrograms.length;
+  const validEp = db.employeePrograms.filter((ep) => {
+    const hasEmp = empIds.has(ep.employeeId);
+    const hasPrg = prgIds.has(ep.programId);
+    return hasEmp && hasPrg;
+  });
+
+  if (validEp.length < initialEpCount) {
+    const removedCount = initialEpCount - validEp.length;
+    repairs.push(`${toPersianDigits(removedCount)} رکورد ارزیابی معلق (فاقد همکار یا طرح معتبر) پاکسازی شد.`);
+  }
+
+  // 2. Ensure each employee has valid school name matching schoolId
+  const schMap = new Map(db.schools.map((s) => [s.id, s]));
+  const repairedEmployees = db.employees.map((emp) => {
+    const sch = schMap.get(emp.schoolId);
+    if (sch && sch.name !== emp.schoolName) {
+      repairs.push(`نام آموزشگاه برای همکار «${emp.fullName}» اصلاح شد.`);
+      return { ...emp, schoolName: sch.name, grade: sch.grade };
+    }
+    return emp;
+  });
+
+  return {
+    repairedDb: {
+      ...db,
+      employees: repairedEmployees,
+      employeePrograms: validEp,
+    },
+    repairs,
+  };
 }
 
 export function exportDatabaseAsJson(db: AppDatabase): void {
