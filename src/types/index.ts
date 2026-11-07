@@ -9,6 +9,7 @@ export const PROGRAM_SECTIONS = [
 export type ProgramSection = (typeof PROGRAM_SECTIONS)[number];
 
 export type EducationalGrade =
+  | 'دوره ابتدایی (مقطع اول و دوم)'
   | 'ابتدایی دوره اول'
   | 'ابتدایی دوره دوم'
   | 'متوسطه اول'
@@ -42,6 +43,8 @@ export type StaffRole =
 
 export type ExecutionStatus = 'done' | 'late' | 'not_done';
 
+export type EmploymentStatus = 'رسمی' | 'پیمانی' | 'بازنشسته' | 'سایر';
+
 export interface Employee {
   id: string;
   code: string; // 2 digits: "01", "02", ... "99" (کد اختصاصی / شناسه سریع)
@@ -54,6 +57,8 @@ export interface Employee {
   role: StaffRole;
   customRoleTitle?: string; // عنوان دقیق در صورت انتخاب گزینه «سایر»
   experienceYears?: number | string; // سابقه خدمت به سال
+  employmentStatus?: EmploymentStatus; // ۱. رسمی ۲. پیمانی ۳. بازنشسته ۴. سایر
+  isClergy?: boolean; // آیا روحانی و طلبه هست یا خیر (در صورت انتخاب سمت‌های پرورشی)
   phone: string;
   notes?: string;
   createdAt: string;
@@ -62,14 +67,17 @@ export interface Employee {
 
 export type SchoolAreaType = 'شهری' | 'روستایی';
 
+export type SchoolType = 'دولتی' | 'غیردولتی' | 'هیئت امنایی';
+
 export interface School {
   id: string;
   name: string;
   code: string;
   grade: EducationalGrade;
   gender: 'دخترانه' | 'پسرانه' | 'مختلط';
-  areaType?: SchoolAreaType; // ۱. شهری یا روستایی
-  address?: string; // ۲. آدرس جغرافیایی اختیاری
+  areaType?: SchoolAreaType; // شهری یا روستایی
+  schoolType?: SchoolType; // دولتی یا غیردولتی یا هیئت امنایی
+  address?: string; // آدرس جغرافیایی اختیاری
   principalName?: string;
   phone?: string;
   notes?: string;

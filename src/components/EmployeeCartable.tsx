@@ -33,6 +33,7 @@ import {
   Layers,
   FileCode,
   PieChart as PieChartIcon,
+  Award,
 } from 'lucide-react';
 import { IsfahanToranjWatermark, IsfahanArchBadge } from './IsfahanMotifs';
 
@@ -308,11 +309,21 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
           </div>
           <div>
             <span className="text-slate-500 block text-[10px]">آموزشگاه محل خدمت:</span>
-            <strong>{employee.schoolName} ({(currentSchool?.areaType || 'شهری') === 'روستایی' ? 'روستایی' : 'شهری'})</strong>
+            <strong>
+              {employee.schoolName} ({currentSchool?.schoolType || 'دولتی'} - {(currentSchool?.areaType || 'شهری') === 'روستایی' ? 'روستایی' : 'شهری'})
+            </strong>
           </div>
           <div>
             <span className="text-slate-500 block text-[10px]">سمت سازمانی:</span>
             <strong>{employee.role}</strong>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px]">وضعیت استخدام:</span>
+            <strong>{employee.employmentStatus || 'رسمی'}</strong>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px]">روحانی و طلبه:</span>
+            <strong>{employee.isClergy ? 'بله (روحانی / طلبه) 🕌' : 'خیر'}</strong>
           </div>
           <div>
             <span className="text-slate-500 block text-[10px]">مقطع تحصیلی:</span>
@@ -408,13 +419,32 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
                 <span className="text-xs bg-teal-500/20 text-teal-300 border border-teal-500/40 px-2.5 py-0.5 rounded-full font-bold">
                   کارتابل فعال
                 </span>
+                <span
+                  className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${
+                    (employee.employmentStatus || 'رسمی') === 'رسمی'
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                      : employee.employmentStatus === 'پیمانی'
+                      ? 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+                      : employee.employmentStatus === 'بازنشسته'
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                      : 'bg-slate-500/20 text-slate-300 border-slate-500/40'
+                  }`}
+                >
+                  وضعیت: {employee.employmentStatus || 'رسمی'}
+                </span>
+                {employee.isClergy && (
+                  <span className="text-xs bg-emerald-400/20 text-emerald-300 border border-emerald-400/50 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-xs">
+                    <span>🕌</span>
+                    <span>روحانی و طلبه</span>
+                  </span>
+                )}
                 <IsfahanArchBadge title="ناحیه ۶ اصفهان" subtitle="ارزشیابی عملکرد" className="no-print" />
               </div>
 
               {/* Colleague & School details grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-2 text-xs text-slate-300 mt-2">
-                {/* School Name and Area Type (شهری / روستایی) */}
-                <div className="flex items-center gap-2 flex-wrap">
+                {/* School Name, Area Type, and School Type */}
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <div className="flex items-center gap-1.5">
                     <Building className="w-3.5 h-3.5 text-teal-400 shrink-0" />
                     <span className="font-bold text-white text-sm">{employee.schoolName}</span>
@@ -426,7 +456,10 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
                         : 'bg-blue-950/80 text-blue-300 border border-blue-500/40'
                     }`}
                   >
-                    {(currentSchool?.areaType || 'شهری') === 'روستایی' ? '🌾 منطقه روستایی' : '🏢 منطقه شهری'}
+                    {(currentSchool?.areaType || 'شهری') === 'روستایی' ? '🌾 روستایی' : '🏢 شهری'}
+                  </span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-950/80 text-amber-300 border border-amber-500/40">
+                    🏛️ {currentSchool?.schoolType || 'دولتی'}
                   </span>
                 </div>
 
@@ -447,6 +480,23 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
                       : employee.role}
                   </span>
                 </div>
+
+                {/* Employment Status (وضعیت استخدام) */}
+                <div className="flex items-center gap-1.5">
+                  <Award className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                  <span className="text-slate-300">وضعیت استخدام:</span>
+                  <span className="text-white font-bold">
+                    {employee.employmentStatus || 'رسمی'}
+                  </span>
+                </div>
+
+                {/* Clergy status */}
+                {employee.isClergy && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-emerald-400 text-sm">🕌</span>
+                    <span className="text-emerald-300 font-bold">همکار محترم روحانی و طلبه</span>
+                  </div>
+                )}
 
                 {/* Experience (سابقه همکار) */}
                 <div className="flex items-center gap-1.5">

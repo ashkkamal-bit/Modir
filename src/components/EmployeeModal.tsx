@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Employee, School, EducationalGrade, STANDARD_ROLES, StandardStaffRole } from '../types';
+import { Employee, School, EducationalGrade, STANDARD_ROLES, StandardStaffRole, EmploymentStatus } from '../types';
 import { padZero } from '../utils/jalali';
-import { X, UserPlus, Save, AlertCircle, Building2, Plus } from 'lucide-react';
+import { X, UserPlus, Save, AlertCircle, Building2, Plus, Award } from 'lucide-react';
 
 interface EmployeeModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ interface EmployeeModalProps {
 }
 
 const GRADES: EducationalGrade[] = [
+  'دوره ابتدایی (مقطع اول و دوم)',
   'ابتدایی دوره اول',
   'ابتدایی دوره دوم',
   'متوسطه اول',
@@ -42,6 +43,8 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
   const [selectedRoleOption, setSelectedRoleOption] = useState<StandardStaffRole>('معاون پرورشی');
   const [customRoleTitle, setCustomRoleTitle] = useState('');
   const [experienceYears, setExperienceYears] = useState('');
+  const [employmentStatus, setEmploymentStatus] = useState<EmploymentStatus>('رسمی');
+  const [isClergy, setIsClergy] = useState<boolean>(false);
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -80,6 +83,8 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
       }
 
       setExperienceYears(existingEmployee.experienceYears !== undefined ? String(existingEmployee.experienceYears) : '');
+      setEmploymentStatus(existingEmployee.employmentStatus || 'رسمی');
+      setIsClergy(existingEmployee.isClergy || false);
       setPhone(existingEmployee.phone);
       setNotes(existingEmployee.notes || '');
       setErrorMessage('');
@@ -97,6 +102,8 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
       setSelectedRoleOption('معاون پرورشی');
       setCustomRoleTitle('');
       setExperienceYears('');
+      setEmploymentStatus('رسمی');
+      setIsClergy(false);
       setPhone('');
       setNotes('');
       setErrorMessage('');
@@ -106,6 +113,14 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
       setNewSchoolGender('پسرانه');
     }
   }, [existingEmployee, isOpen, schools, existingEmployees]);
+
+  const isParvareshiRole =
+    selectedRoleOption.includes('پرورشی') ||
+    (selectedRoleOption === 'سایر' &&
+      (customRoleTitle.includes('پرورشی') ||
+        customRoleTitle.includes('تربیتی') ||
+        customRoleTitle.includes('قرآن') ||
+        customRoleTitle.includes('نماز')));
 
   const handleSchoolChange = (newSchoolId: string) => {
     if (newSchoolId === '__NEW__') {
@@ -148,6 +163,12 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
         ? (customRoleTitle.trim() || 'سایر')
         : selectedRoleOption;
 
+    const parsedExperience = experienceYears.trim()
+      ? isNaN(Number(experienceYears.trim()))
+        ? experienceYears.trim()
+        : Number(experienceYears.trim())
+      : undefined;
+
     if (isNewSchoolMode) {
       if (!newSchoolName.trim()) {
         setErrorMessage('لطفاً نام آموزشگاه جدید را وارد نمایید.');
@@ -173,7 +194,9 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
           grade,
           role: finalRole,
           customRoleTitle: selectedRoleOption === 'سایر' ? customRoleTitle.trim() : undefined,
-          experienceYears: experienceYears.trim() ? (isNaN(Number(experienceYears.trim())) ? experienceYears.trim() : Number(experienceYears.trim())) : undefined,
+          experienceYears: parsedExperience,
+          employmentStatus,
+          isClergy: isParvareshiRole ? isClergy : false,
           phone: phone.trim(),
           notes: notes.trim(),
         },
@@ -195,7 +218,9 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
           grade,
           role: finalRole,
           customRoleTitle: selectedRoleOption === 'سایر' ? customRoleTitle.trim() : undefined,
-          experienceYears: experienceYears.trim() ? (isNaN(Number(experienceYears.trim())) ? experienceYears.trim() : Number(experienceYears.trim())) : undefined,
+          experienceYears: parsedExperience,
+          employmentStatus,
+          isClergy: isParvareshiRole ? isClergy : false,
           phone: phone.trim(),
           notes: notes.trim(),
         },
@@ -375,6 +400,66 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
             </div>
           )}
 
+          {/* روحانی و طلبه بودن همکار (فعال در صورت انتخاب سمت‌های پرورشی) */}
+          {isParvareshiRole && (
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-300/80 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-xs animate-fade-in">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-xl shrink-0 shadow-xs">
+                  🕌
+                </div>
+                <div>
+                  <label htmlFor="isClergyCheck" className="text-xs font-bold text-emerald-950 block cursor-pointer">
+                    آیا این همکار محترم روحانی و طلبه است؟
+                  </label>
+                  <span className="text-[11px] text-emerald-700">
+                    ویژه سمت‌های پرورشی و تربیتی جهت ساماندهی ائمه جماعات و مربیان طلبه
+                  </span>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  id="isClergyCheck"
+                  checked={isClergy}
+                  onChange={(e) => setIsClergy(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-12 h-6 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+              </label>
+            </div>
+          )}
+
+          {/* وضعیت استخدام و سابقه خدمت */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                وضعیت استخدام <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={employmentStatus}
+                onChange={(e) => setEmploymentStatus(e.target.value as EmploymentStatus)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-hidden text-sm font-bold text-slate-800"
+                required
+              >
+                <option value="رسمی">۱. رسمی</option>
+                <option value="پیمانی">۲. پیمانی</option>
+                <option value="بازنشسته">۳. بازنشسته</option>
+                <option value="سایر">۴. سایر</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">سابقه خدمت (سال)</label>
+              <input
+                type="text"
+                value={experienceYears}
+                onChange={(e) => setExperienceYears(e.target.value)}
+                placeholder="مثال: 15 یا 15 سال"
+                className="w-full text-center font-mono font-bold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-hidden text-sm"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">کد ملی (۱۰ رقمی)</label>
@@ -401,28 +486,16 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">سابقه خدمت (سال)</label>
-              <input
-                type="text"
-                value={experienceYears}
-                onChange={(e) => setExperienceYears(e.target.value)}
-                placeholder="مثال: 15 یا 15 سال"
-                className="w-full text-center font-mono font-bold px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-hidden text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">شماره تماس همکار</label>
-              <input
-                type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="0913..."
-                dir="ltr"
-                className="w-full text-right px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-hidden text-sm"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">شماره تماس همکار</label>
+            <input
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="0913..."
+              dir="ltr"
+              className="w-full text-right px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-hidden text-sm"
+            />
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">

@@ -255,6 +255,7 @@ export const PerformanceReport: React.FC<PerformanceReportProps> = ({
               className="w-full py-2 px-3 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden"
             >
               <option value="all">تمام مقاطع تحصیلی</option>
+              <option value="دوره ابتدایی (مقطع اول و دوم)">دوره ابتدایی (مقطع اول و دوم)</option>
               <option value="ابتدایی دوره اول">ابتدایی دوره اول</option>
               <option value="ابتدایی دوره دوم">ابتدایی دوره دوم</option>
               <option value="متوسطه اول">متوسطه اول</option>

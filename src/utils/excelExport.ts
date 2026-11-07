@@ -136,6 +136,8 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       'آموزشگاه',
       'مقطع تحصیلی',
       'سمت سازمانی',
+      'وضعیت استخدام',
+      'روحانی و طلبه',
       'سابقه خدمت (سال)',
       'کل طرح‌ها',
       'طرح‌های همگانی',
@@ -168,6 +170,8 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       emp.schoolName,
       emp.grade,
       emp.role,
+      emp.employmentStatus || 'رسمی',
+      emp.isClergy ? 'بله (روحانی/طلبه)' : 'خیر',
       emp.experienceYears !== undefined ? `${emp.experienceYears} سال` : '---',
       empAssignments.length,
       stats.total,
@@ -185,7 +189,7 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
   const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
   ws2['!cols'] = [
     { wch: 6 }, { wch: 10 }, { wch: 22 }, { wch: 16 }, { wch: 14 }, { wch: 30 }, { wch: 20 }, { wch: 20 },
-    { wch: 16 }, { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 16 },
+    { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 16 },
     { wch: 14 }, { wch: 18 }, { wch: 18 }, { wch: 20 },
   ];
   XLSX.utils.book_append_sheet(wb, ws2, 'خلاصه همکاران و سوابق');
@@ -239,6 +243,7 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       'ردیف',
       'کد آموزشگاه',
       'نام آموزشگاه',
+      'نوع اداره آموزشگاه',
       'مقطع تحصیلی',
       'جنسیت',
       'موقعیت جغرافیایی',
@@ -261,6 +266,7 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       r4++,
       sch.code,
       sch.name,
+      sch.schoolType || 'دولتی',
       sch.grade,
       sch.gender,
       sch.areaType || 'شهری',
@@ -277,7 +283,7 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
   }
   const ws4 = XLSX.utils.aoa_to_sheet(sheet4Data);
   ws4['!cols'] = [
-    { wch: 6 }, { wch: 14 }, { wch: 32 }, { wch: 22 }, { wch: 12 }, { wch: 18 },
+    { wch: 6 }, { wch: 14 }, { wch: 32 }, { wch: 18 }, { wch: 22 }, { wch: 12 }, { wch: 18 },
     { wch: 35 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 14 },
     { wch: 16 }, { wch: 20 }, { wch: 18 },
   ];

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { School, EducationalGrade } from '../types';
+import { School, EducationalGrade, SchoolType } from '../types';
 import { X, School as SchoolIcon, Save, AlertCircle } from 'lucide-react';
 
 interface SchoolModalProps {
@@ -11,6 +11,7 @@ interface SchoolModalProps {
 }
 
 const GRADES: EducationalGrade[] = [
+  'دوره ابتدایی (مقطع اول و دوم)',
   'ابتدایی دوره اول',
   'ابتدایی دوره دوم',
   'متوسطه اول',
@@ -31,6 +32,7 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
   const [grade, setGrade] = useState<EducationalGrade>('متوسطه اول');
   const [gender, setGender] = useState<'دخترانه' | 'پسرانه' | 'مختلط'>('پسرانه');
   const [areaType, setAreaType] = useState<'شهری' | 'روستایی'>('شهری');
+  const [schoolType, setSchoolType] = useState<SchoolType>('دولتی');
   const [address, setAddress] = useState('');
   const [principalName, setPrincipalName] = useState('');
   const [phone, setPhone] = useState('');
@@ -44,6 +46,7 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
       setGrade(existingSchool.grade);
       setGender(existingSchool.gender);
       setAreaType(existingSchool.areaType || 'شهری');
+      setSchoolType(existingSchool.schoolType || 'دولتی');
       setAddress(existingSchool.address || '');
       setPrincipalName(existingSchool.principalName || '');
       setPhone(existingSchool.phone || '');
@@ -55,6 +58,7 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
       setGrade('متوسطه اول');
       setGender('پسرانه');
       setAreaType('شهری');
+      setSchoolType('دولتی');
       setAddress('');
       setPrincipalName('');
       setPhone('');
@@ -77,6 +81,7 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
         grade,
         gender,
         areaType,
+        schoolType,
         address: address.trim() || undefined,
         principalName: principalName.trim(),
         phone: phone.trim(),
@@ -169,18 +174,32 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                موقعیت جغرافیایی آموزشگاه <span className="text-rose-500">*</span>
+                موقعیت جغرافیایی <span className="text-rose-500">*</span>
               </label>
               <select
                 value={areaType}
                 onChange={(e) => setAreaType(e.target.value as 'شهری' | 'روستایی')}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-sm font-medium"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-xs font-medium"
               >
                 <option value="شهری">شهری (آموزشگاه شهری)</option>
                 <option value="روستایی">روستایی (آموزشگاه روستایی)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                نوع آموزشگاه <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={schoolType}
+                onChange={(e) => setSchoolType(e.target.value as SchoolType)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-xs font-medium"
+              >
+                <option value="دولتی">دولتی</option>
+                <option value="غیردولتی">غیردولتی (غیرانتفاعی)</option>
+                <option value="هیئت امنایی">هیئت امنایی</option>
               </select>
             </div>
             <div>
@@ -190,7 +209,7 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
                 value={principalName}
                 onChange={(e) => setPrincipalName(e.target.value)}
                 placeholder="مثال: علیرضا محمدی"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-sm"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-xs"
               />
             </div>
           </div>

@@ -104,6 +104,8 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
   const [schoolFilter, setSchoolFilter] = useState('all');
   const [gradeFilter, setGradeFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [employmentStatusFilter, setEmploymentStatusFilter] = useState('all');
+  const [clergyFilter, setClergyFilter] = useState('all');
 
   const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
 
@@ -202,9 +204,11 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
       codeFilter.trim() !== '' ||
       schoolFilter !== 'all' ||
       gradeFilter !== 'all' ||
-      roleFilter !== 'all'
+      roleFilter !== 'all' ||
+      employmentStatusFilter !== 'all' ||
+      clergyFilter !== 'all'
     );
-  }, [generalSearch, nameFilter, codeFilter, schoolFilter, gradeFilter, roleFilter]);
+  }, [generalSearch, nameFilter, codeFilter, schoolFilter, gradeFilter, roleFilter, employmentStatusFilter, clergyFilter]);
 
   const handleClearAllFilters = () => {
     setGeneralSearch('');
@@ -213,6 +217,8 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
     setSchoolFilter('all');
     setGradeFilter('all');
     setRoleFilter('all');
+    setEmploymentStatusFilter('all');
+    setClergyFilter('all');
   };
 
   const filteredEmployees = useMemo(() => {
@@ -274,9 +280,19 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
         }
       }
 
+      if (employmentStatusFilter !== 'all') {
+        const currentStatus = emp.employmentStatus || 'رسمی';
+        if (currentStatus !== employmentStatusFilter) return false;
+      }
+
+      if (clergyFilter !== 'all') {
+        if (clergyFilter === 'clergy_only' && !emp.isClergy) return false;
+        if (clergyFilter === 'non_clergy' && emp.isClergy) return false;
+      }
+
       return true;
     });
-  }, [employees, generalSearch, nameFilter, codeFilter, schoolFilter, gradeFilter, roleFilter]);
+  }, [employees, generalSearch, nameFilter, codeFilter, schoolFilter, gradeFilter, roleFilter, employmentStatusFilter, clergyFilter]);
 
   const sortedEmployees = useMemo(() => {
     return [...filteredEmployees].sort((a, b) => {
@@ -490,6 +506,34 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
                   ))}
                 </select>
               </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">وضعیت استخدام:</label>
+                <select
+                  value={employmentStatusFilter}
+                  onChange={(e) => setEmploymentStatusFilter(e.target.value)}
+                  className="w-full py-2 px-2 bg-slate-50 border border-slate-300 rounded-xl outline-hidden font-medium"
+                >
+                  <option value="all">همه وضعیت‌ها</option>
+                  <option value="رسمی">۱. رسمی</option>
+                  <option value="پیمانی">۲. پیمانی</option>
+                  <option value="بازنشسته">۳. بازنشسته</option>
+                  <option value="سایر">۴. سایر</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">روحانی و طلبه:</label>
+                <select
+                  value={clergyFilter}
+                  onChange={(e) => setClergyFilter(e.target.value)}
+                  className="w-full py-2 px-2 bg-slate-50 border border-slate-300 rounded-xl outline-hidden font-medium"
+                >
+                  <option value="all">همه</option>
+                  <option value="clergy_only">فقط روحانی و طلبه 🕌</option>
+                  <option value="non_clergy">غیر روحانی</option>
+                </select>
+              </div>
             </div>
           </div>
         )}
@@ -549,8 +593,27 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
                 </div>
 
                 <h3 className="text-base font-bold text-slate-800">{emp.fullName}</h3>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
                   <span className="text-xs text-emerald-800 font-semibold">{emp.role}</span>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${
+                      (emp.employmentStatus || 'رسمی') === 'رسمی'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : emp.employmentStatus === 'پیمانی'
+                        ? 'bg-sky-50 text-sky-800 border border-sky-200'
+                        : emp.employmentStatus === 'بازنشسته'
+                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                        : 'bg-slate-100 text-slate-700 border border-slate-300'
+                    }`}
+                  >
+                    {emp.employmentStatus || 'رسمی'}
+                  </span>
+                  {emp.isClergy && (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 rounded-md font-bold flex items-center gap-1 shadow-2xs">
+                      <span>🕌</span>
+                      <span>روحانی و طلبه</span>
+                    </span>
+                  )}
                   {emp.experienceYears !== undefined && emp.experienceYears !== '' && (
                     <span className="text-[11px] bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.2 rounded-md font-bold">
                       سابقه: {toPersianDigits(emp.experienceYears)} سال
@@ -608,6 +671,8 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
                 <th onClick={() => toggleSort('school')} className="p-3 cursor-pointer">آموزشگاه</th>
                 <th className="p-3">مقطع</th>
                 <th className="p-3">سمت</th>
+                <th className="p-3 text-center">وضعیت استخدام</th>
+                <th className="p-3 text-center">طلبه / روحانی</th>
                 <th className="p-3 text-center">سابقه خدمت</th>
                 <th className="p-3 text-center w-28">عملیات</th>
               </tr>
@@ -623,13 +688,38 @@ export const EmployeesManagement: React.FC<EmployeesManagementProps> = ({
                   <td className="p-3 text-slate-700">{emp.schoolName}</td>
                   <td className="p-3 text-slate-500">{emp.grade}</td>
                   <td className="p-3 text-emerald-800 font-semibold">{emp.role}</td>
+                  <td className="p-3 text-center">
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${
+                        (emp.employmentStatus || 'رسمی') === 'رسمی'
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          : emp.employmentStatus === 'پیمانی'
+                          ? 'bg-sky-50 text-sky-800 border border-sky-200'
+                          : emp.employmentStatus === 'بازنشسته'
+                          ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                          : 'bg-slate-100 text-slate-700 border border-slate-300'
+                      }`}
+                    >
+                      {emp.employmentStatus || 'رسمی'}
+                    </span>
+                  </td>
+                  <td className="p-3 text-center">
+                    {emp.isClergy ? (
+                      <span className="text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-300 px-2 py-0.5 rounded-md font-bold inline-flex items-center gap-1 shadow-2xs">
+                        <span>🕌</span>
+                        <span>روحانی/طلبه</span>
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">---</span>
+                    )}
+                  </td>
                   <td className="p-3 text-center font-bold text-amber-800 font-mono">
                     {emp.experienceYears !== undefined && emp.experienceYears !== '' ? `${toPersianDigits(emp.experienceYears)} سال` : '---'}
                   </td>
                   <td className="p-3 text-center">
                     <button
                       onClick={() => onSelectEmployee(emp)}
-                      className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold cursor-pointer"
+                      className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold cursor-pointer hover:bg-emerald-600 hover:text-white transition-colors"
                     >
                       کارتابل
                     </button>

@@ -6,6 +6,7 @@ import {
   School,
   EducationalGrade,
   STANDARD_ROLES,
+  EmploymentStatus,
 } from '../types';
 import { normalizePersianText } from '../utils/storage';
 import { toPersianDigits, getCurrentJalaliDate, padZero } from '../utils/jalali';
@@ -47,6 +48,8 @@ interface ParsedEmployeeRow {
   role: string;
   customRoleTitle?: string;
   experienceYears: string | number;
+  employmentStatus?: EmploymentStatus;
+  isClergy?: boolean;
   phone: string;
   notes: string;
   isExisting: boolean;
@@ -95,6 +98,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
     grade: '',
     role: '',
     experienceYears: '',
+    employmentStatus: '',
+    isClergy: '',
     employeeCode: '',
     phone: '',
     notes: '',
@@ -124,6 +129,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
       grade: '',
       role: '',
       experienceYears: '',
+      employmentStatus: '',
+      isClergy: '',
       employeeCode: '',
       phone: '',
       notes: '',
@@ -195,6 +202,10 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         norm.includes('exp')
       ) {
         map.experienceYears = h;
+      } else if (norm.includes('استخدام') || norm.includes('وضعیت')) {
+        map.employmentStatus = h;
+      } else if (norm.includes('روحانی') || norm.includes('طلبه')) {
+        map.isClergy = h;
       } else if (
         (norm.includes('کد') && norm.includes('کارتابل')) ||
         norm.includes('کد دو رقمی') ||
@@ -310,6 +321,28 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
     return { role: 'سایر', customRoleTitle: trimmed };
   };
 
+  const normalizeEmploymentStatus = (raw?: string): EmploymentStatus => {
+    if (!raw) return 'رسمی';
+    const norm = normalizePersianText(raw);
+    if (norm.includes('پیمانی') || norm === '2') return 'پیمانی';
+    if (norm.includes('بازنشسته') || norm === '3') return 'بازنشسته';
+    if (norm.includes('سایر') || norm === '4') return 'سایر';
+    return 'رسمی';
+  };
+
+  const normalizeClergy = (raw?: string): boolean => {
+    if (!raw) return false;
+    const norm = normalizePersianText(raw);
+    return (
+      norm.includes('روحانی') ||
+      norm.includes('طلبه') ||
+      norm === 'بله' ||
+      norm === 'دارد' ||
+      norm === 'true' ||
+      norm === '1'
+    );
+  };
+
   const analyzeRows = () => {
     if (rawDataRows.length === 0) return;
     setIsProcessing(true);
@@ -362,6 +395,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
       const gradeRaw = getVal(columnMap.grade);
       const roleRaw = getVal(columnMap.role);
       const expRaw = getVal(columnMap.experienceYears);
+      const empStatusRaw = getVal(columnMap.employmentStatus);
+      const clergyRaw = getVal(columnMap.isClergy);
       const userCodeRaw = getVal(columnMap.employeeCode);
       const phone = getVal(columnMap.phone);
       const notes = getVal(columnMap.notes);
@@ -402,6 +437,7 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
       }
 
       const { role, customRoleTitle } = normalizeRole(roleRaw || matchedEmp?.role);
+      const isParvareshi = role.includes('پرورشی') || (customRoleTitle && customRoleTitle.includes('پرورشی'));
 
       parsed.push({
         rowIdx: idx + 2,
@@ -414,6 +450,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         role: role,
         customRoleTitle: customRoleTitle,
         experienceYears: expValue !== '' ? expValue : matchedEmp?.experienceYears || '',
+        employmentStatus: empStatusRaw ? normalizeEmploymentStatus(empStatusRaw) : (matchedEmp?.employmentStatus || 'رسمی'),
+        isClergy: clergyRaw ? normalizeClergy(clergyRaw) : (isParvareshi ? (matchedEmp?.isClergy || false) : false),
         phone: phone || matchedEmp?.phone || '',
         notes: notes || matchedEmp?.notes || '',
         isExisting,
@@ -481,6 +519,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
               row.customRoleTitle !== undefined ? row.customRoleTitle : current.customRoleTitle,
             experienceYears:
               row.experienceYears !== '' ? row.experienceYears : current.experienceYears,
+            employmentStatus: row.employmentStatus || current.employmentStatus || 'رسمی',
+            isClergy: row.isClergy !== undefined ? row.isClergy : current.isClergy,
             phone: row.phone || current.phone,
             notes: row.notes || current.notes,
           };
@@ -499,6 +539,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
           role: row.role,
           customRoleTitle: row.customRoleTitle,
           experienceYears: row.experienceYears !== '' ? row.experienceYears : undefined,
+          employmentStatus: row.employmentStatus || 'رسمی',
+          isClergy: row.isClergy || false,
           phone: row.phone || '',
           notes: row.notes || 'بارگذاری از اکسل',
           createdAt: getCurrentJalaliDate(),
@@ -534,6 +576,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
       'نام آموزشگاه',
       'مقطع تحصیلی',
       'سمت سازمانی',
+      'وضعیت استخدام',
+      'روحانی یا طلبه',
       'سابقه خدمت (سال)',
       'شماره تماس',
       'توضیحات و سوابق',
@@ -548,9 +592,11 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         'دبیرستان شهید بهشتی',
         'متوسطه اول',
         'معاون پرورشی',
+        'رسمی',
+        'بله',
         '15',
         '09131112233',
-        'مسئول پایگاه فرهنگی و تربیتی',
+        'مسئول پایگاه فرهنگی و تربیتی و امام جماعت',
       ],
       [
         '1287349102',
@@ -559,6 +605,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         'دبیرستان فرزانگان',
         'متوسطه دوم نظری',
         'معاون پرورشی',
+        'رسمی',
+        'خیر',
         '12',
         '09132223344',
         'پیگیر و فعال در حوزه مسابقات قرآن',
@@ -570,6 +618,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         'دبستان انقلاب اسلامی',
         'ابتدایی دوره دوم',
         'آموزگار',
+        'پیمانی',
+        'خیر',
         '8',
         '09133334455',
         'آموزگار پایه پنجم و مربی تشکل‌ها',
@@ -581,6 +631,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         'هنرستان فنی دخترانه کوثر',
         'هنرستان فنی و حرفه‌ای و کاردانش',
         'دبیر',
+        'رسمی',
+        'خیر',
         '10',
         '09134445566',
         'دبیر تربیت بدنی و مسئول المپیاد ورزشی',
@@ -592,6 +644,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         'دبیرستان امام صادق (ع)',
         'متوسطه دوم نظری',
         'مدیر',
+        'بازنشسته',
+        'خیر',
         '22',
         '09135556677',
         'مدیر با سابقه و هماهنگ‌کننده طرح‌ها',
@@ -603,6 +657,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         'دبستان نور دانش',
         'ابتدایی دوره اول',
         'رابط پرورشی',
+        'رسمی',
+        'خیر',
         '6',
         '09134445566',
         'رابط پرورشی فعال و پیگیر در اجرای برنامه‌های فرهنگی و تربیتی',
@@ -614,6 +670,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
         'دبیرستان امیرکبیر',
         'متوسطه اول',
         'مربی پرورشی',
+        'رسمی',
+        'بله',
         '10',
         '09135556677',
         'مربی پرورشی توانمند و مجری اردوها و مسابقات فرهنگی',
@@ -628,6 +686,8 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
       { wch: 30 }, // نام آموزشگاه
       { wch: 22 }, // مقطع تحصیلی
       { wch: 20 }, // سمت
+      { wch: 16 }, // وضعیت استخدام
+      { wch: 16 }, // روحانی یا طلبه
       { wch: 18 }, // سابقه خدمت
       { wch: 16 }, // شماره تماس
       { wch: 35 }, // توضیحات
@@ -947,6 +1007,40 @@ export const EmployeeExcelImportModal: React.FC<EmployeeExcelImportModalProps> =
                     className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-800"
                   >
                     <option value="">-- انتخاب ستون سابقه خدمت --</option>
+                    {rawHeaders.map((h) => (
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Optional Employment Status */}
+                <div className="p-3 bg-white rounded-xl border border-teal-200 shadow-xs space-y-1">
+                  <label className="font-bold text-teal-900 block">وضعیت استخدام (اختیاری):</label>
+                  <select
+                    value={columnMap.employmentStatus}
+                    onChange={(e) => setColumnMap({ ...columnMap, employmentStatus: e.target.value })}
+                    className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium"
+                  >
+                    <option value="">-- پیش‌فرض: رسمی --</option>
+                    {rawHeaders.map((h) => (
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Optional Clergy / Talabeh */}
+                <div className="p-3 bg-white rounded-xl border border-emerald-200 shadow-xs space-y-1">
+                  <label className="font-bold text-emerald-950 block">روحانی و طلبه (اختیاری):</label>
+                  <select
+                    value={columnMap.isClergy}
+                    onChange={(e) => setColumnMap({ ...columnMap, isClergy: e.target.value })}
+                    className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium"
+                  >
+                    <option value="">-- پیش‌فرض: غیرروحانی --</option>
                     {rawHeaders.map((h) => (
                       <option key={h} value={h}>
                         {h}
