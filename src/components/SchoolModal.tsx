@@ -30,6 +30,8 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
   const [code, setCode] = useState('');
   const [grade, setGrade] = useState<EducationalGrade>('متوسطه اول');
   const [gender, setGender] = useState<'دخترانه' | 'پسرانه' | 'مختلط'>('پسرانه');
+  const [areaType, setAreaType] = useState<'شهری' | 'روستایی'>('شهری');
+  const [address, setAddress] = useState('');
   const [principalName, setPrincipalName] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
@@ -41,6 +43,8 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
       setCode(existingSchool.code);
       setGrade(existingSchool.grade);
       setGender(existingSchool.gender);
+      setAreaType(existingSchool.areaType || 'شهری');
+      setAddress(existingSchool.address || '');
       setPrincipalName(existingSchool.principalName || '');
       setPhone(existingSchool.phone || '');
       setNotes(existingSchool.notes || '');
@@ -50,6 +54,8 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
       setCode(`10${existingSchools.length + 1}`);
       setGrade('متوسطه اول');
       setGender('پسرانه');
+      setAreaType('شهری');
+      setAddress('');
       setPrincipalName('');
       setPhone('');
       setNotes('');
@@ -70,6 +76,8 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
         code: code.trim() || '---',
         grade,
         gender,
+        areaType,
+        address: address.trim() || undefined,
         principalName: principalName.trim(),
         phone: phone.trim(),
         notes: notes.trim(),
@@ -159,6 +167,71 @@ export const SchoolModal: React.FC<SchoolModalProps> = ({
                 <option value="مختلط">مختلط</option>
               </select>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                موقعیت جغرافیایی آموزشگاه <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={areaType}
+                onChange={(e) => setAreaType(e.target.value as 'شهری' | 'روستایی')}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-sm font-medium"
+              >
+                <option value="شهری">شهری (آموزشگاه شهری)</option>
+                <option value="روستایی">روستایی (آموزشگاه روستایی)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">نام مدیر آموزشگاه</label>
+              <input
+                type="text"
+                value={principalName}
+                onChange={(e) => setPrincipalName(e.target.value)}
+                placeholder="مثال: علیرضا محمدی"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">شماره تماس آموزشگاه</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="مثال: 03132220000"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-sm font-mono text-left"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                آدرس دقیق جغرافیایی آموزشگاه <span className="text-xs text-slate-400 font-normal">(اختیاری)</span>
+              </label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="مثال: اصفهان، خیابان بزرگمهر، کوچه بهار، پلاک ۱۲"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              توضیحات و یادداشت‌ها <span className="text-xs text-slate-400 font-normal">(اختیاری)</span>
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="توضیحات تکمیلی..."
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-hidden text-sm"
+            />
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">

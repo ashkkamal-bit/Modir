@@ -60,12 +60,16 @@ export interface Employee {
   isActive?: boolean;
 }
 
+export type SchoolAreaType = 'شهری' | 'روستایی';
+
 export interface School {
   id: string;
   name: string;
   code: string;
   grade: EducationalGrade;
   gender: 'دخترانه' | 'پسرانه' | 'مختلط';
+  areaType?: SchoolAreaType; // ۱. شهری یا روستایی
+  address?: string; // ۲. آدرس جغرافیایی اختیاری
   principalName?: string;
   phone?: string;
   notes?: string;
@@ -78,6 +82,8 @@ export type ProgramScope = 'همگانی' | 'اختصاصی';
 export type ProgramCoefficient = 1 | 2 | 3;
 
 export type AppFont = 'vazir' | 'mitra' | 'titr' | 'nastaliq';
+
+export type ReportScopeFilter = 'all' | 'general' | 'specific';
 
 export interface Program {
   id: string;

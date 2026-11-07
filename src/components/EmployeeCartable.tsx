@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Employee, Program, EmployeeProgram, ExecutionStatus, ProgramSection, PROGRAM_SECTIONS } from '../types';
+import {
+  Employee,
+  Program,
+  EmployeeProgram,
+  ExecutionStatus,
+  ProgramSection,
+  PROGRAM_SECTIONS,
+  School,
+} from '../types';
 import { calculateEmployeeDualScopeStats } from '../utils/storage';
 import { toPersianDigits, padZero } from '../utils/jalali';
 import { PieChart } from './PieChart';
@@ -11,6 +19,9 @@ import {
   GraduationCap,
   Briefcase,
   Phone,
+  PhoneCall,
+  MapPin,
+  Clock,
   Zap,
   Printer,
   ChevronRight,
@@ -28,6 +39,7 @@ import { IsfahanToranjWatermark, IsfahanArchBadge } from './IsfahanMotifs';
 interface EmployeeCartableProps {
   employee: Employee;
   allEmployees: Employee[];
+  schools?: School[];
   programs: Program[];
   employeePrograms: EmployeeProgram[];
   onSelectEmployee: (emp: Employee) => void;
@@ -56,6 +68,7 @@ const renderPlatformBadge = (plat?: string) => {
 export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
   employee,
   allEmployees,
+  schools = [],
   programs,
   employeePrograms,
   onSelectEmployee,
@@ -66,6 +79,10 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
   onQuickCodeSearch,
   onExportHtml,
 }) => {
+  const currentSchool =
+    schools.find((s) => s.id === employee.schoolId) ||
+    schools.find((s) => s.name === employee.schoolName);
+
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<EmployeeProgram | null>(null);
   const [confirmDeleteAssignment, setConfirmDeleteAssignment] = useState<{ id: string; title: string } | null>(null);
@@ -74,6 +91,7 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
   const [filterSection, setFilterSection] = useState<string>('all');
   const [filterScope, setFilterScope] = useState<'all' | 'همگانی' | 'اختصاصی'>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [reportCardScope, setReportCardScope] = useState<'both' | 'همگانی' | 'اختصاصی'>('both');
 
   // Active Pie Chart Tab ('both' | 'general' | 'specific')
   const [pieChartTab, setPieChartTab] = useState<'both' | 'general' | 'specific'>('both');
@@ -92,6 +110,7 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
   const nextEmployee = currentIndex < allEmployees.length - 1 ? allEmployees[currentIndex + 1] : null;
 
   // Filtered assignments
+  const effectiveScope = reportCardScope !== 'both' ? reportCardScope : filterScope;
   const filteredAssignments = assignments.filter((a) => {
     const prg = prgMap.get(a.programId);
     if (!prg) return false;
@@ -99,9 +118,9 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
       const pSec = prg.section || 'پرورشی';
       if (pSec !== filterSection) return false;
     }
-    if (filterScope !== 'all') {
+    if (effectiveScope !== 'all') {
       const pScope = prg.scope || 'همگانی';
-      if (pScope !== filterScope) return false;
+      if (pScope !== effectiveScope) return false;
     }
     if (filterStatus !== 'all' && a.status !== filterStatus) return false;
     return true;
@@ -115,8 +134,18 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = (scope: 'both' | 'همگانی' | 'اختصاصی' = reportCardScope) => {
+    setReportCardScope(scope);
+    if (scope === 'همگانی') {
+      setPieChartTab('general');
+    } else if (scope === 'اختصاصی') {
+      setPieChartTab('specific');
+    } else {
+      setPieChartTab('both');
+    }
+    setTimeout(() => {
+      window.print();
+    }, 150);
   };
 
   const activeEditingProgram = editingAssignment
@@ -179,8 +208,8 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
           </button>
         </form>
 
-        {/* Actions (Batch, Print, HTML) */}
-        <div className="flex items-center gap-2">
+        {/* Actions (Batch, Print Modes, HTML) */}
+        <div className="flex flex-wrap items-center gap-2">
           {onExportHtml && (
             <button
               type="button"
@@ -203,23 +232,158 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
             <span className="hidden sm:inline">کارت همکار</span>
           </button>
 
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-          >
-            <Printer className="w-4 h-4 text-slate-600" />
-            <span>چاپ کارنامه</span>
-          </button>
+          {/* Dedicated Report Card Print Buttons */}
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              onClick={() => handlePrint('همگانی')}
+              className="flex items-center gap-1 px-2.5 py-1 text-slate-700 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+              title="صدور و چاپ کارنامه اختصاصی طرح‌های عمومی (همگانی)"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>کارنامه عمومی</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePrint('اختصاصی')}
+              className="flex items-center gap-1 px-2.5 py-1 text-slate-700 hover:bg-purple-600 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+              title="صدور و چاپ کارنامه اختصاصی طرح‌های موردی و اختصاصی"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>کارنامه اختصاصی</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePrint('both')}
+              className="flex items-center gap-1 px-2.5 py-1 text-slate-700 hover:bg-slate-800 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+              title="صدور و چاپ کارنامه جامع (هر دو بخش عمومی و اختصاصی)"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>کارنامه جامع</span>
+            </button>
+          </div>
 
           <button
             type="button"
             onClick={() => setIsBatchModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer"
           >
             <Zap className="w-4 h-4 text-amber-300" />
             <span>ثبت سریع وضعیت‌ها</span>
           </button>
+        </div>
+      </div>
+
+      {/* Official Print Header for Physical or PDF Printing */}
+      <div className="hidden print:block mb-4 p-5 border-2 border-slate-900 rounded-2xl bg-white text-slate-900 space-y-3">
+        <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3">
+          <div className="text-right space-y-0.5">
+            <h2 className="text-base font-black">جمهوری اسلامی ایران</h2>
+            <h3 className="text-sm font-bold">وزارت آموزش و پرورش</h3>
+            <p className="text-xs text-slate-600">اداره آموزش و پرورش ناحیه ۶ اصفهان</p>
+          </div>
+
+          <div className="text-center">
+            <div className="text-base font-black px-4 py-1.5 border-2 border-slate-900 rounded-xl bg-slate-50 inline-block">
+              {reportCardScope === 'همگانی'
+                ? 'کارنامه اختصاصی طرح‌های عمومی (همگانی)'
+                : reportCardScope === 'اختصاصی'
+                ? 'کارنامه اختصاصی طرح‌ها و برنامه‌های اختصاصی'
+                : 'کارنامه جامع ارزشیابی عملکرد و برنامه‌های همکار'}
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1">سال تحصیلی ۱۴۰۳ - ۱۴۰۴</p>
+          </div>
+
+          <div className="text-left font-mono text-xs space-y-0.5">
+            <div>کد شناسایی: <strong>{employee.code}</strong></div>
+            <div>پرسنلی: <strong>{employee.personnelCode || '---'}</strong></div>
+            <div>تاریخ صدور: <strong>{new Date().toLocaleDateString('fa-IR')}</strong></div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-medium bg-slate-50 p-3 rounded-xl border border-slate-300">
+          <div>
+            <span className="text-slate-500 block text-[10px]">نام و نام خانوادگی:</span>
+            <strong>{employee.fullName}</strong>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px]">آموزشگاه محل خدمت:</span>
+            <strong>{employee.schoolName} ({(currentSchool?.areaType || 'شهری') === 'روستایی' ? 'روستایی' : 'شهری'})</strong>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px]">سمت سازمانی:</span>
+            <strong>{employee.role}</strong>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px]">مقطع تحصیلی:</span>
+            <strong>{employee.grade}</strong>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px]">سابقه خدمت:</span>
+            <strong>
+              {employee.experienceYears !== undefined && employee.experienceYears !== ''
+                ? `${toPersianDigits(employee.experienceYears)} سال`
+                : '---'}
+            </strong>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px]">شماره تماس موبایل همکار:</span>
+            <strong dir="ltr" className="font-mono">{employee.phone || '---'}</strong>
+          </div>
+          <div>
+            <span className="text-slate-500 block text-[10px]">شماره تماس آموزشگاه:</span>
+            <strong dir="ltr" className="font-mono">{currentSchool?.phone || '---'}</strong>
+          </div>
+          <div className="col-span-1 truncate" title={currentSchool?.address || ''}>
+            <span className="text-slate-500 block text-[10px]">آدرس جغرافیایی آموزشگاه:</span>
+            <strong className="truncate block">{currentSchool?.address || '---'}</strong>
+          </div>
+        </div>
+
+        {/* Summary metrics row in print */}
+        <div className="grid grid-cols-4 gap-2 text-xs text-center border border-slate-300 rounded-xl p-2 bg-slate-100">
+          <div>
+            <span className="text-slate-600 block text-[10px]">نوع کارنامه:</span>
+            <strong className="font-bold">
+              {reportCardScope === 'همگانی'
+                ? 'فقط طرح‌های همگانی'
+                : reportCardScope === 'اختصاصی'
+                ? 'فقط طرح‌های اختصاصی'
+                : 'جامع (همگانی + اختصاصی)'}
+            </strong>
+          </div>
+          <div>
+            <span className="text-slate-600 block text-[10px]">تعداد کل طرح‌های این کارنامه:</span>
+            <strong className="font-bold">
+              {toPersianDigits(
+                reportCardScope === 'همگانی'
+                  ? general.total
+                  : reportCardScope === 'اختصاصی'
+                  ? specific.total
+                  : assignments.length
+              )} طرح
+            </strong>
+          </div>
+          <div>
+            <span className="text-slate-600 block text-[10px]">درصد پیشرفت اجرا:</span>
+            <strong className="font-bold font-mono">
+              %{toPersianDigits(
+                reportCardScope === 'همگانی'
+                  ? general.progressPercent
+                  : reportCardScope === 'اختصاصی'
+                  ? specific.progressPercent
+                  : Math.round(((general.done + general.late + specific.done + specific.late) / (assignments.length || 1)) * 100)
+              )}
+            </strong>
+          </div>
+          <div>
+            <span className="text-slate-600 block text-[10px]">امتیاز مکتسبه رسمی:</span>
+            <strong className="font-bold font-mono">
+              {reportCardScope === 'اختصاصی'
+                ? 'بدون احتساب رتبه'
+                : `${toPersianDigits(officialScore)} امتیاز`}
+            </strong>
+          </div>
         </div>
       </div>
 
@@ -228,7 +392,7 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
         <IsfahanToranjWatermark className="w-64 h-64 absolute -left-12 -bottom-12 text-teal-400 pointer-events-none" opacity={0.12} />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-4 flex-1">
             <div className="flex flex-col items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-teal-500 via-cyan-600 to-blue-700 text-white rounded-2xl shadow-lg border-2 border-teal-300/50 shrink-0">
               <span className="text-3xl sm:text-4xl font-black font-mono tracking-wider">
                 {employee.code}
@@ -238,8 +402,8 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
               </span>
             </div>
 
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h1 className="text-2xl sm:text-3xl font-black">{employee.fullName}</h1>
                 <span className="text-xs bg-teal-500/20 text-teal-300 border border-teal-500/40 px-2.5 py-0.5 rounded-full font-bold">
                   کارتابل فعال
@@ -247,51 +411,105 @@ export const EmployeeCartable: React.FC<EmployeeCartableProps> = ({
                 <IsfahanArchBadge title="ناحیه ۶ اصفهان" subtitle="ارزشیابی عملکرد" className="no-print" />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-1.5 text-xs text-slate-300 mt-2">
-                <div className="flex items-center gap-1.5">
-                  <Building className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                  <span className="font-semibold text-white">{employee.schoolName}</span>
+              {/* Colleague & School details grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-2 text-xs text-slate-300 mt-2">
+                {/* School Name and Area Type (شهری / روستایی) */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                    <span className="font-bold text-white text-sm">{employee.schoolName}</span>
+                  </div>
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      (currentSchool?.areaType || 'شهری') === 'روستایی'
+                        ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-blue-950/80 text-blue-300 border border-blue-500/40'
+                    }`}
+                  >
+                    {(currentSchool?.areaType || 'شهری') === 'روستایی' ? '🌾 منطقه روستایی' : '🏢 منطقه شهری'}
+                  </span>
                 </div>
+
+                {/* Grade */}
                 <div className="flex items-center gap-1.5">
                   <GraduationCap className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                  <span>{employee.grade}</span>
+                  <span className="text-slate-300">مقطع:</span>
+                  <span className="text-white font-medium">{employee.grade}</span>
                 </div>
+
+                {/* Role */}
                 <div className="flex items-center gap-1.5">
                   <Briefcase className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                  <span>
+                  <span className="text-slate-300">سمت:</span>
+                  <span className="text-white font-medium">
                     {employee.role === 'سایر' && employee.customRoleTitle
                       ? `سایر: ${employee.customRoleTitle}`
                       : employee.role}
                   </span>
                 </div>
+
+                {/* Experience (سابقه همکار) */}
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="text-amber-300 font-bold">سابقه خدمت:</span>
+                  <span className="text-amber-300 font-bold text-sm">
+                    {employee.experienceYears !== undefined && employee.experienceYears !== ''
+                      ? `${toPersianDigits(employee.experienceYears)} سال`
+                      : 'ثبت نشده'}
+                  </span>
+                </div>
+
+                {/* Colleague Mobile (شماره تماس موبایل همکار) */}
+                <div className="flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                  <span className="text-teal-200 font-medium">موبایل همکار:</span>
+                  <span dir="ltr" className="font-mono text-white font-bold tracking-wider">
+                    {employee.phone || '---'}
+                  </span>
+                </div>
+
+                {/* School Phone (شماره تماس آموزشگاه) */}
+                <div className="flex items-center gap-1.5">
+                  <PhoneCall className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="text-amber-200 font-medium">تلفن آموزشگاه:</span>
+                  <span dir="ltr" className="font-mono text-white font-bold tracking-wider">
+                    {currentSchool?.phone || '---'}
+                  </span>
+                </div>
+
+                {/* National ID */}
                 {employee.nationalId && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-teal-400 font-bold text-[11px]">کد ملی:</span>
                     <span className="font-mono text-white">{employee.nationalId}</span>
                   </div>
                 )}
+
+                {/* Personnel Code */}
                 {employee.personnelCode && (
                   <div className="flex items-center gap-1.5">
-                    <span className="text-teal-400 font-bold text-[11px]">پرسنلی:</span>
+                    <span className="text-teal-400 font-bold text-[11px]">کد پرسنلی:</span>
                     <span className="font-mono text-white">{employee.personnelCode}</span>
-                  </div>
-                )}
-                {employee.experienceYears !== undefined && employee.experienceYears !== '' && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-teal-400 font-bold text-[11px]">سابقه خدمت:</span>
-                    <span className="text-amber-300 font-bold">{toPersianDigits(employee.experienceYears)} سال</span>
-                  </div>
-                )}
-                {employee.phone && (
-                  <div className="flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-                    <span dir="ltr">{employee.phone}</span>
                   </div>
                 )}
               </div>
 
+              {/* School Geographical Address (آدرس جغرافیایی آموزشگاه) */}
+              <div className="flex items-start gap-1.5 bg-white/5 border border-white/10 rounded-xl px-3 py-2 mt-3 text-xs">
+                <MapPin className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-teal-300 font-bold">آدرس جغرافیایی آموزشگاه:</span>
+                  <span className="text-white font-medium">
+                    {currentSchool?.address || 'آدرس جغرافیایی این آموزشگاه هنوز در سامانه درج نشده است.'}
+                  </span>
+                  <span className="text-[11px] text-teal-200/80 mr-2">
+                    ({(currentSchool?.areaType || 'شهری') === 'روستایی' ? 'آموزشگاه روستایی' : 'آموزشگاه شهری'})
+                  </span>
+                </div>
+              </div>
+
               {employee.notes && (
-                <p className="text-xs text-slate-400 mt-3 pt-2.5 border-t border-slate-700/60 leading-relaxed max-w-2xl">
+                <p className="text-xs text-slate-400 mt-2.5 pt-2 border-t border-slate-700/60 leading-relaxed max-w-2xl">
                   <strong>یادداشت کارشناس: </strong> {employee.notes}
                 </p>
               )}

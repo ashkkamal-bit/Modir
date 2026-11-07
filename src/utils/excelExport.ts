@@ -241,6 +241,8 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       'نام آموزشگاه',
       'مقطع تحصیلی',
       'جنسیت',
+      'موقعیت جغرافیایی',
+      'آدرس جغرافیایی',
       'تعداد نیروها',
       'کل تکالیف',
       'انجام شده',
@@ -248,6 +250,7 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       'انجام نشده',
       'درصد پیشرفت',
       'امتیاز وزنی مدرسه',
+      'میانگین هر نیرو',
     ],
   ];
 
@@ -260,6 +263,8 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       sch.name,
       sch.grade,
       sch.gender,
+      sch.areaType || 'شهری',
+      sch.address || '---',
       sStats.staffCount,
       sStats.totalPrograms,
       sStats.done,
@@ -267,12 +272,14 @@ export function exportFullExcelReport(db: AppDatabase, filenamePrefix = 'گزا�
       sStats.notDone,
       `${sStats.progressPercent}%`,
       sStats.earnedWeightedScore,
+      sStats.averageStaffScore,
     ]);
   }
   const ws4 = XLSX.utils.aoa_to_sheet(sheet4Data);
   ws4['!cols'] = [
-    { wch: 6 }, { wch: 14 }, { wch: 32 }, { wch: 22 }, { wch: 12 }, { wch: 16 },
-    { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 20 },
+    { wch: 6 }, { wch: 14 }, { wch: 32 }, { wch: 22 }, { wch: 12 }, { wch: 18 },
+    { wch: 35 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 14 },
+    { wch: 16 }, { wch: 20 }, { wch: 18 },
   ];
   XLSX.utils.book_append_sheet(wb, ws4, 'گزارش آموزشگاه‌ها');
 

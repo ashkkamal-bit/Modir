@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Employee, EmployeeProgram, School, Program } from '../types';
+import { Employee, EmployeeProgram, School, Program, ReportScopeFilter } from '../types';
 import { calculateEmployeeStats } from '../utils/storage';
 import { toPersianDigits } from '../utils/jalali';
 import {
@@ -9,6 +9,8 @@ import {
   FileSpreadsheet,
   ExternalLink,
   Users,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 
 interface PerformanceReportProps {
@@ -35,7 +37,7 @@ type SortField =
 export const PerformanceReport: React.FC<PerformanceReportProps> = ({
   employees,
   employeePrograms,
-  programs,
+  programs = [],
   schools,
   onSelectEmployee,
   onExportExcel,
@@ -44,19 +46,20 @@ export const PerformanceReport: React.FC<PerformanceReportProps> = ({
   const [filterSchool, setFilterSchool] = useState('all');
   const [filterGrade, setFilterGrade] = useState('all');
   const [filterRole, setFilterRole] = useState('all');
+  const [filterScope, setFilterScope] = useState<ReportScopeFilter>('general');
 
   const [sortField, setSortField] = useState<SortField>('code');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const rows = useMemo(() => {
     return employees.map((emp) => {
-      const stats = calculateEmployeeStats(emp.id, employeePrograms, programs);
+      const stats = calculateEmployeeStats(emp.id, employeePrograms, programs, filterScope);
       return {
         emp,
         stats,
       };
     });
-  }, [employees, employeePrograms, programs]);
+  }, [employees, employeePrograms, programs, filterScope]);
 
   const filteredRows = useMemo(() => {
     return rows.filter(({ emp, stats }) => {
@@ -64,8 +67,17 @@ export const PerformanceReport: React.FC<PerformanceReportProps> = ({
       if (filterGrade !== 'all' && emp.grade !== filterGrade) return false;
       if (filterRole !== 'all') {
         if (filterRole === 'سایر') {
-          const coreSix = new Set(['مدیر', 'معاون آموزشی', 'معاون پرورشی', 'دبیر', 'آموزگار', 'معاون اجرایی']);
-          const isStandard = coreSix.has(emp.role) || emp.role.startsWith('معاون پرورشی');
+          const coreStandard = new Set([
+            'مدیر',
+            'معاون آموزشی',
+            'معاون پرورشی',
+            'مربی پرورشی',
+            'رابط پرورشی',
+            'دبیر',
+            'آموزگار',
+            'معاون اجرایی',
+          ]);
+          const isStandard = coreStandard.has(emp.role) || emp.role.startsWith('معاون پرورشی');
           if (isStandard && emp.role !== 'سایر') return false;
         } else if (filterRole === 'معاون پرورشی') {
           if (emp.role !== 'معاون پرورشی' && !emp.role.includes('معاون پرورشی')) return false;
@@ -159,64 +171,116 @@ export const PerformanceReport: React.FC<PerformanceReportProps> = ({
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 no-print">
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="جستجوی کد، نام یا آموزشگاه..."
-            className="w-full pr-9 pl-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden focus:bg-white"
-          />
+      {/* Scope Filter and Controls */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3 no-print">
+        {/* Row 1: Scope Selector */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-bold text-slate-700">دامنه شمول طرح‌ها در ارزیابی همکاران:</span>
+          </div>
+
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => setFilterScope('all')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filterScope === 'all'
+                  ? 'bg-white text-slate-900 shadow-xs font-black'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>همه طرح‌ها (عمومی و اختصاصی)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFilterScope('general')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filterScope === 'general'
+                  ? 'bg-emerald-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 hover:text-emerald-700'
+              }`}
+            >
+              <span>🌐 فقط طرح‌های عمومی (همگانی)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFilterScope('specific')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filterScope === 'specific'
+                  ? 'bg-purple-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 hover:text-purple-700'
+              }`}
+            >
+              <span>⭐ فقط طرح‌های اختصاصی</span>
+            </button>
+          </div>
         </div>
 
-        <div>
-          <select
-            value={filterSchool}
-            onChange={(e) => setFilterSchool(e.target.value)}
-            className="w-full py-2 px-3 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden"
-          >
-            <option value="all">تمام آموزشگاه‌ها ({toPersianDigits(distinctSchools.length)})</option>
-            {distinctSchools.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Row 2: Search and Category Filters */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="جستجوی کد، نام یا آموزشگاه..."
+              className="w-full pr-9 pl-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden focus:bg-white"
+            />
+          </div>
 
-        <div>
-          <select
-            value={filterGrade}
-            onChange={(e) => setFilterGrade(e.target.value)}
-            className="w-full py-2 px-3 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden"
-          >
-            <option value="all">تمام مقاطع تحصیلی</option>
-            <option value="ابتدایی دوره اول">ابتدایی دوره اول</option>
-            <option value="ابتدایی دوره دوم">ابتدایی دوره دوم</option>
-            <option value="متوسطه اول">متوسطه اول</option>
-            <option value="متوسطه دوم نظری">متوسطه دوم نظری</option>
-            <option value="هنرستان فنی و حرفه‌ای و کاردانش">هنرستان</option>
-          </select>
-        </div>
+          <div>
+            <select
+              value={filterSchool}
+              onChange={(e) => setFilterSchool(e.target.value)}
+              className="w-full py-2 px-3 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden"
+            >
+              <option value="all">تمام آموزشگاه‌ها ({toPersianDigits(distinctSchools.length)})</option>
+              {distinctSchools.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-            className="w-full py-2 px-3 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden font-medium"
-          >
-            <option value="all">تمام سمت‌ها</option>
-            <option value="مدیر">مدیر</option>
-            <option value="معاون آموزشی">معاون آموزشی</option>
-            <option value="معاون پرورشی">معاون پرورشی</option>
-            <option value="دبیر">دبیر</option>
-            <option value="آموزگار">آموزگار</option>
-            <option value="معاون اجرایی">معاون اجرایی</option>
-            <option value="سایر">سایر</option>
-          </select>
+          <div>
+            <select
+              value={filterGrade}
+              onChange={(e) => setFilterGrade(e.target.value)}
+              className="w-full py-2 px-3 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden"
+            >
+              <option value="all">تمام مقاطع تحصیلی</option>
+              <option value="ابتدایی دوره اول">ابتدایی دوره اول</option>
+              <option value="ابتدایی دوره دوم">ابتدایی دوره دوم</option>
+              <option value="متوسطه اول">متوسطه اول</option>
+              <option value="متوسطه دوم نظری">متوسطه دوم نظری</option>
+              <option value="هنرستان فنی و حرفه‌ای و کاردانش">هنرستان</option>
+            </select>
+          </div>
+
+          <div>
+            <select
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+              className="w-full py-2 px-3 text-xs bg-slate-50 border border-slate-300 rounded-xl outline-hidden font-medium"
+            >
+              <option value="all">تمام سمت‌ها</option>
+              <option value="مدیر">مدیر</option>
+              <option value="معاون آموزشی">معاون آموزشی</option>
+              <option value="معاون پرورشی">معاون پرورشی</option>
+              <option value="مربی پرورشی">مربی پرورشی</option>
+              <option value="رابط پرورشی">رابط پرورشی</option>
+              <option value="دبیر">دبیر</option>
+              <option value="آموزگار">آموزگار</option>
+              <option value="معاون اجرایی">معاون اجرایی</option>
+              <option value="سایر">سایر</option>
+            </select>
+          </div>
         </div>
       </div>
 

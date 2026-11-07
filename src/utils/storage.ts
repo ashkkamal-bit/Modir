@@ -622,22 +622,30 @@ export function normalizePersianText(str: string | undefined | null): string {
 }
 
 /**
- * محاسبه امتیاز و آمار همکاران بر اساس برنامه‌های همگانی با ضرایب ۱ تا ۳
+ * محاسبه امتیاز و آمار همکاران بر اساس برنامه‌های همگانی، اختصاصی یا همه طرح‌ها با ضرایب ۱ تا ۳
  */
 export function calculateEmployeeStats(
   employeeId: string,
   allEmployeePrograms: EmployeeProgram[],
   allPrograms?: Program[],
+  scopeFilter: 'all' | 'general' | 'specific' = 'general',
 ): EmployeeStats {
   const prgMap = new Map((allPrograms || []).map((p) => [p.id, p]));
   let assignments = allEmployeePrograms.filter((ep) => ep.employeeId === employeeId);
 
-  // Filter out اختصاصی programs for official ranking score
+  // Filter based on scopeFilter
   if (allPrograms && allPrograms.length > 0) {
-    assignments = assignments.filter((ep) => {
-      const prg = prgMap.get(ep.programId);
-      return !prg || prg.scope !== 'اختصاصی';
-    });
+    if (scopeFilter === 'general') {
+      assignments = assignments.filter((ep) => {
+        const prg = prgMap.get(ep.programId);
+        return !prg || prg.scope !== 'اختصاصی';
+      });
+    } else if (scopeFilter === 'specific') {
+      assignments = assignments.filter((ep) => {
+        const prg = prgMap.get(ep.programId);
+        return prg && prg.scope === 'اختصاصی';
+      });
+    }
   }
 
   const total = assignments.length;
@@ -764,11 +772,26 @@ export function calculateSchoolStats(
   employees: Employee[],
   allEmployeePrograms: EmployeeProgram[],
   allPrograms?: Program[],
+  scopeFilter: 'all' | 'general' | 'specific' = 'all',
 ): SchoolStats {
   const prgMap = new Map((allPrograms || []).map((p) => [p.id, p]));
   const schoolEmployees = employees.filter((e) => e.schoolId === schoolId);
   const empIds = new Set(schoolEmployees.map((e) => e.id));
-  const assignments = allEmployeePrograms.filter((ep) => empIds.has(ep.employeeId));
+  let assignments = allEmployeePrograms.filter((ep) => empIds.has(ep.employeeId));
+
+  if (allPrograms && allPrograms.length > 0) {
+    if (scopeFilter === 'general') {
+      assignments = assignments.filter((ep) => {
+        const prg = prgMap.get(ep.programId);
+        return !prg || prg.scope !== 'اختصاصی';
+      });
+    } else if (scopeFilter === 'specific') {
+      assignments = assignments.filter((ep) => {
+        const prg = prgMap.get(ep.programId);
+        return prg && prg.scope === 'اختصاصی';
+      });
+    }
+  }
 
   const totalPrograms = assignments.length;
   const done = assignments.filter((a) => a.status === 'done').length;
@@ -814,6 +837,19 @@ export function calculateSchoolStats(
     averageStaffScore,
   };
 }
+
+export function calculateSchoolDualScopeStats(
+  schoolId: string,
+  employees: Employee[],
+  allEmployeePrograms: EmployeeProgram[],
+  allPrograms: Program[],
+) {
+  const general = calculateSchoolStats(schoolId, employees, allEmployeePrograms, allPrograms, 'general');
+  const specific = calculateSchoolStats(schoolId, employees, allEmployeePrograms, allPrograms, 'specific');
+  const all = calculateSchoolStats(schoolId, employees, allEmployeePrograms, allPrograms, 'all');
+  return { general, specific, all };
+}
+
 
 export function calculateProgramStats(programId: string, allEmployeePrograms: EmployeeProgram[]) {
   const assignments = allEmployeePrograms.filter((ep) => ep.programId === programId);

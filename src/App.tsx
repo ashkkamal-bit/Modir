@@ -507,6 +507,7 @@ export default function App() {
             <EmployeeCartable
               employee={selectedEmployee}
               allEmployees={db.employees}
+              schools={db.schools}
               programs={db.programs}
               employeePrograms={db.employeePrograms}
               onSelectEmployee={setSelectedEmployee}
